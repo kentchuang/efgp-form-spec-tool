@@ -5,8 +5,11 @@
 > 消除業務需求端 (User)、系統分析師 (SA) 與開發工程師 (PG) 之間的溝通鴻溝，讓表單規劃像積木拼裝一樣直覺流暢！
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Zero-Dependency](https://img.shields.io/badge/Dependencies-Zero-green.svg)](#-快速開始-quick-start)
+[![Zero-Dependency](https://img.shields.io/badge/Dependencies-Zero-green.svg)](#-技術架構-architecture)
 [![Pure Frontend](https://img.shields.io/badge/Platform-Pure%20HTML5%20%2F%20JS-orange.svg)](#-技術架構-architecture)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success.svg)](https://kentchuang.github.io/efgp-form-spec-tool/)
+
+👉 **[點此立刻線上體驗 (Live Demo)](https://kentchuang.github.io/efgp-form-spec-tool/)**
 
 ---
 
@@ -15,32 +18,37 @@
 在企業導入或客製鼎新 EFGP 電子表單時，最常遭遇以下痛點：
 1. **溝通成本極高**：業務需求單位 (User) 用 Word/Excel 畫出無格線邏輯的草稿，工程師難以精準還原為 EFGP 的 Bootstrap 格線排版。
 2. **規格遺漏與反覆修改**：欄位是否必填、開窗關聯代碼、資料來源（ERP / SAP RFC / 系統變數）以及簽核關卡權限經常在開發後期才發現定義不明。
-3. **歷史表單逆向困難**：接手維護舊表單時，面對龐雜的 `.form` XML 檔案，難以快速掌握所有欄位清單與排版架構。
+3. **流程與表單權限混淆**：傳統在設計師設定欄位權限極度繁瑣，業務單位難以理解流程各關卡與表單欄位填寫權責的對應。
+4. **歷史表單逆向困難**：接手維護舊表單時，面對龐雜的 `.form` XML 檔案，難以快速掌握所有欄位清單與排版架構。
 
-**本工具將「訪談確認 ➔ 視覺化排版 ➔ 防呆規格定義 ➔ 關卡權限矩陣 ➔ 匯出簽核」整合為一體化流程！**
+**本工具將「訪談確認 ➔ 視覺化排版 ➔ 防呆規格定義 ➔ 區塊權限矩陣 ➔ 匯出簽核」整合為一體化流程！**
 
 ---
 
 ## 🌟 核心功能特色 (Key Features)
 
-### 1. 🚀 零環境相依・雙擊即用 (Zero Dependency)
+### 1. 🚀 零環境相依・雙擊即用 (Zero Dependency & Privacy)
 - **單一 HTML 檔案**：不需安裝 Node.js、Python 或架設任何後端資料庫。
-- 只要有現代瀏覽器（Chrome, Edge, Firefox, Safari），雙擊即可立刻開始設計。
+- **雙擊即可開始**：只要有現代瀏覽器（Chrome, Edge, Firefox, Safari），下載後直接開啟即可設計。
+- **企業資安與隱私保證**：100% 離線純前端運作，所有規格資料僅儲存於瀏覽器本機 `localStorage`，無任何後端伺服器連線或資料外洩風險；通過深度資安審查（Claude Code Security Review），徹底阻絕 DOM-based XSS。
 
-### 2. 🎨 仿 EFGP 設計師的視覺化排版 (Visual Designer)
-- **區塊與多列樣板 (Rows)**：支援單欄 (100%)、等寬雙欄 (50:50)、比例雙欄 (40:60 / 60:40 / 30:70 / 70:30)、三欄與四欄等彈性排版。
+### 2. 🎨 專注現代 RWD 響應式排版 (Visual RWD Designer)
+- **Bootstrap 12 格線體系**：支援單欄 (100%)、等寬雙欄 (50:50)、比例雙欄 (40:60 / 60:40 / 30:70 / 70:30)、三欄與四欄等響應式佈局。
 - **26+ 種完整表單元件庫**：文字框 (TextBox)、多行文字 (TextArea)、下拉選單 (Dropdown)、單選鈕/核取方塊 (Radio/Checkbox)、開窗查詢複合元件 (Dialog/Label)、單身動態表格 (Grid)、日期選擇 (Date)、附件 (Attachment)、SubTab 頁籤容器等。
 - **常設固定區塊**：預載標準「申請人基本資料」8 大常設欄位（工號、姓名、部門、分機、申請日期等）。
 
-### 3. 🔄 逆向工程：支援直接匯入 `.form` 原始檔
-- **一鍵逆向解析**：支援匯入 EFGP 匯出的 `.form` (XML) 原始設計檔，自動逆向剖析元件代號、中文名稱、排版位置與單身 Grid 定義，快速建立表單盤點清單。
+### 3. 🛡️ 創新的「區塊權限矩陣」(Block-Based Permission Matrix)
+- **區塊自動連動關卡**：預設僅「申請填單」關卡；畫布中每新增一個業務區塊（如：審查意見、主管覆核），系統自動動態增列對應關卡，避免與後台流程引擎設定混淆。
+- **直覺權責劃分**：該區塊所屬欄位於對應關卡預設為「編輯」，其餘區塊欄位自動為「唯讀」，精準契合企業實際作業邏輯。
+- **極速批次操作**：支援單元格點擊快速輪巡（編輯/唯讀/隱藏）、單列橫向全關卡批次套用、單欄縱向全欄位批次套用，以及一鍵重置為區塊權責預設值。
+- **內建系統防呆**：嚴格遵循 EFGP 規範，表單流水號 (`SerialNumber`) 禁止設定停用 (disable)。
 
-### 4. 🛡️ 關卡權限矩陣 (setFieldControl)
-- **精準權限定義**：直接對應 EFGP JS 的 `setFieldControl()` 規範，視覺化配置填單人、直屬主管、權責單位、會辦主管與核准關卡之**編輯 (Editable) / 唯讀 (Read-only) / 隱藏 (Hidden)** 狀態。
+### 4. 🔄 逆向工程：支援直接匯入 `.form` 原始檔
+- **一鍵逆向解析**：支援匯入 EFGP 匯出的 `.form` (XML) 原始設計檔，自動逆向剖析元件代號、中文名稱、排版位置與單身 Grid 定義，快速建立表單盤點清單。
 
 ### 5. 💾 自動儲存與草稿保護機制 (Auto-Save & Recovery)
 - **瀏覽器 LocalStorage 即時存檔**：編輯過程即時背景自動備份。
-- **智慧還原提示**：意外關閉瀏覽器或斷電時，再次開啟會主動提示還原未匯出的最新草稿，防止心血遺失。
+- **智慧還原提示**：意外關閉瀏覽器、重新整理或斷電時，再次開啟會主動提示還原未匯出的最新草稿，防止心血遺失。
 
 ### 6. 📤 跨格式成果匯出與列印 (Export & Print)
 - **匯出 JSON**：保存完整規格結構，方便跨團隊傳遞、版本控制與二度載入。
@@ -66,13 +74,13 @@
 flowchart LR
     A["1. 填寫基本資料\n(表單名稱/代號/目標)"] --> B["2. 視覺化排版\n(挑選樣板/置放元件)"]
     B --> C["3. 防呆與資料來源\n(必填/來源/正規表達式)"]
-    C --> D["4. 關卡權限與匯出\n(矩陣設定/匯出JSON/列印)"]
+    C --> D["4. 區塊權限與匯出\n(矩陣設定/匯出JSON/列印)"]
 ```
 
 1. **填寫基本資料**：設定表單中文名稱、Form ID（如 `MaGpTrans`）與需求背景摘要。
 2. **視覺化排版**：新增業務區塊，挑選列樣板（單欄/雙欄/比例欄），點選空格放入元件。
 3. **設定防呆與規則**：點擊畫布上的元件，設定標籤名稱、必填狀態、下拉選單選項或 ERP 開窗查詢來源。
-4. **權限確認與匯出**：至「關卡權限矩陣」配置各簽核關卡欄位權限，點選頂部按鈕匯出 **JSON**、**Markdown** 或**列印簽核**。
+4. **權限確認與匯出**：至「區塊權限矩陣」確認各關卡權限連動，點選頂部按鈕匯出 **JSON**、**Markdown** 或**列印簽核**。
 
 ---
 
@@ -88,6 +96,10 @@ flowchart LR
 
 ## 📂 檔案使用說明
 
+### 方式 A：線上免安裝使用
+直接造訪 👉 **[GitHub Pages 線上展示](https://kentchuang.github.io/efgp-form-spec-tool/)**
+
+### 方式 B：本機離線使用
 1. 將本專案 Clone 或直接下載單一檔案：
    ```bash
    git clone https://github.com/kentchuang/efgp-form-spec-tool.git
