@@ -154,7 +154,7 @@
                 <span class="text-slate-300">➔</span>
                 <button type="button" onclick="switchTab('matrix')" class="hover:text-indigo-600 px-2 py-1 rounded hover:bg-indigo-50 transition font-bold text-slate-700">3. 規格盤點大表</button>
                 <span class="text-slate-300">➔</span>
-                <button type="button" onclick="switchTab('permission')" class="hover:text-indigo-600 px-2 py-1 rounded hover:bg-indigo-50 transition font-bold text-slate-700">4. 關卡權限矩陣</button>
+                <button type="button" onclick="switchTab('permission')" class="hover:text-indigo-600 px-2 py-1 rounded hover:bg-indigo-50 transition font-bold text-slate-700">4. 區塊權限矩陣</button>
                 <span class="text-slate-300">➔</span>
                 <a href="#reviewSignSection" class="hover:text-indigo-600 px-2 py-1 rounded hover:bg-indigo-50 transition">5. 總覽與簽核</a>
             </div>
@@ -233,7 +233,8 @@
                 </button>
                 <button onclick="switchTab('permission')" id="tabBtn-permission" class="px-5 py-3.5 text-sm sm:text-base font-bold border-b-3 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2.5 whitespace-nowrap">
                     <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-800 text-xs flex items-center justify-center font-extrabold">3</span>
-                    <span>關卡權限矩陣 (setFieldControl)</span>
+                    <!-- modify by kentchuang_ai 20260919: 關卡權限矩陣改名為區塊權限矩陣 -->
+                    <span>區塊權限矩陣 (setFieldControl)</span>
                 </button>
             </div>
 
@@ -314,7 +315,7 @@
                                 <i class="fa-solid fa-file-export text-purple-600 mr-2"></i> 權限確認與匯出
                             </h5>
                             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                前往「關卡權限矩陣」確認各關卡編輯/唯讀狀態，點選頂部<strong>「匯出 JSON」</strong>交付工程師匯入再確認，亦可<strong>「匯出 Markdown」</strong>或<strong>列印紙本簽核單</strong>！
+                                前往「區塊權限矩陣」確認各區塊關卡編輯/唯讀狀態，點選頂部<strong>「匯出 JSON」</strong>交付工程師匯入再確認，亦可<strong>「產生 setFieldControl 腳本」</strong>、<strong>「匯出 Markdown」</strong>或<strong>列印紙本簽核單</strong>！
                             </p>
                         </div>
                     </div>
@@ -947,31 +948,38 @@
                 </div>
             </div>
 
-            <!-- Tab 3: 關卡權限矩陣 (modify by kentchuang_ai 20260917: 支援動態新增/編輯關卡與元件權限下拉選單) -->
+            <!-- Tab 3: 區塊權限矩陣 (modify by kentchuang_ai 20260919: 改為區塊權限矩陣，以表單區塊劃分簽核關卡並集中控制 setFieldControl) -->
             <div id="tabContent-permission" class="p-6 hidden space-y-4">
                 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-sm sm:text-base text-indigo-900 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center space-x-2.5">
                         <i class="fa-solid fa-shield-halved text-indigo-600 text-xl"></i>
-                        <span class="font-medium">依照專案規範，各關卡之「唯讀」、「編輯」、「隱藏」等狀態應統一於 JavaScript 的 <code>setFieldControl()</code> 中集中控制，避免在流程設計師中分散配置。</span>
+                        <span class="font-medium">以<strong>表單區塊劃分簽核關卡</strong>（區塊 = 關卡），各區塊欄位狀態統一於 JavaScript 的 <code>setFieldControl()</code> 中集中控制，避免與流程設計師設定混淆。</span>
                     </div>
                     <span class="text-xs sm:text-sm text-red-600 font-extrabold bg-red-100 px-3 py-1 rounded-full">⚠️ SerialNumber 嚴禁設為 Disable！</span>
                 </div>
 
-                <!-- 關卡控制工具列 (新增關卡、快速批次設定、重置關卡) -->
+                <!-- 區塊與關卡控制工具列 (新增關卡、快速批次設定、重置關卡) -->
                 <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 no-print">
                     <div class="flex items-center space-x-2">
-                        <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-diagram-project text-indigo-600 mr-1.5"></i> 簽核流程關卡管理：</span>
-                        <span id="activityCountBadge" class="px-2.5 py-0.5 text-xs bg-indigo-100 text-indigo-800 rounded-full font-bold">2 個關卡</span>
+                        <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-layer-group text-indigo-600 mr-1.5"></i> 區塊對應填寫關卡管理：</span>
+                        <span id="activityCountBadge" class="px-2.5 py-0.5 text-xs bg-indigo-100 text-indigo-800 rounded-full font-bold">1 個關卡</span>
                     </div>
+                    <!-- modify by kentchuang_ai 20260919: 增加「依區塊權責自動推導」與「產生 setFieldControl() 腳本」按鈕 -->
                     <div class="flex items-center flex-wrap gap-2">
+                        <button type="button" onclick="applyAutoDerivePermissions()" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg transition shadow-sm flex items-center" title="根據各區塊所設定的主責填寫關卡，自動重算並套用全表欄位權限">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 依區塊權責自動推導
+                        </button>
+                        <button type="button" onclick="openScriptGeneratorModal()" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition shadow-sm flex items-center" title="產生符合規範之標準 EFGP setFieldControl() JavaScript 程式碼">
+                            <i class="fa-solid fa-code mr-1.5"></i> 產生 setFieldControl() 腳本
+                        </button>
                         <button type="button" onclick="openAddActivityModal()" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition shadow-sm flex items-center">
-                            <i class="fa-solid fa-plus mr-1.5"></i> 新增關卡 (Add Activity)
+                            <i class="fa-solid fa-plus mr-1.5"></i> 新增關卡
                         </button>
                         <button type="button" onclick="batchSetAllFields('唯讀')" class="px-3 py-1.5 text-xs sm:text-sm font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition flex items-center">
                             <i class="fa-solid fa-lock mr-1.5"></i> 全表設為唯讀
                         </button>
                         <button type="button" onclick="resetActivitiesToDefault()" class="px-3 py-1.5 text-xs sm:text-sm font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition flex items-center">
-                            <i class="fa-solid fa-rotate-left mr-1.5"></i> 恢復預設 2 關卡
+                            <i class="fa-solid fa-rotate-left mr-1.5"></i> 恢復預設 1 關卡
                         </button>
                     </div>
                 </div>
@@ -1047,9 +1055,21 @@
             <form id="sectionForm" onsubmit="saveSectionItem(event)" class="p-6 space-y-5 text-sm overflow-y-auto custom-scrollbar flex-1">
                 <input type="hidden" id="sectionEditIndex" value="-1">
 
-                <div>
-                    <label for="sectionNameInput" class="block font-bold text-slate-700 mb-1.5">區塊名稱 (Section Name) *</label>
-                    <input type="text" id="sectionNameInput" placeholder="例如：會議決策 / 轉倉主檔資訊 / 申請明細項目" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium" required>
+                <!-- modify by kentchuang_ai 20260919: 支援區塊綁定主責簽核關卡，實現權限自動推導 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="sectionNameInput" class="block font-bold text-slate-700 mb-1.5">區塊名稱 (Section Name) *</label>
+                        <input type="text" id="sectionNameInput" placeholder="例如：會議決策 / 轉倉主檔資訊 / 申請明細項目" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium" required>
+                    </div>
+                    <div>
+                        <label for="sectionRespActivityInput" class="block font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                            <span><i class="fa-solid fa-user-check text-indigo-600 mr-1.5"></i>主責填寫關卡 (Responsible Activity)</span>
+                            <span class="text-xs text-indigo-600 font-normal">自動推導權限</span>
+                        </label>
+                        <select id="sectionRespActivityInput" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold bg-white text-indigo-900">
+                            <!-- 動態填入關卡清單 -->
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -1306,14 +1326,53 @@
         </div>
     </div>
 
+    <!-- 彈窗 4: 產生 setFieldControl() JavaScript 腳本 Modal (add by kentchuang_ai 20260919) -->
+    <div id="scriptGeneratorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-code text-emerald-400 text-xl"></i>
+                    <h3 class="text-base sm:text-lg font-bold">自動產生 EFGP setFieldControl() 欄位權限控制腳本</h3>
+                </div>
+                <button type="button" onclick="closeScriptGeneratorModal()" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
+                <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600 flex-wrap gap-2">
+                    <span>依照當前區塊結構與各關卡權限配置，自動產生符合專案開發規範之集中式欄位控制函式。</span>
+                    <span class="font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">✓ 自動排除 SerialNumber</span>
+                </div>
+                <div class="relative">
+                    <pre class="bg-slate-950 text-slate-100 p-4 rounded-xl font-mono text-xs sm:text-sm overflow-x-auto custom-scrollbar border border-slate-800 leading-relaxed max-h-[55vh] selection:bg-indigo-700 selection:text-white"><code id="generatedScriptCode">// 產生中...</code></pre>
+                </div>
+            </div>
+            <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-200">
+                <span id="copyScriptSuccessMsg" class="hidden text-sm font-bold text-emerald-600 flex items-center">
+                    <i class="fa-solid fa-check mr-1.5"></i> 已成功複製程式碼至剪貼簿！
+                </span>
+                <div class="flex space-x-3 ml-auto">
+                    <button type="button" onclick="closeScriptGeneratorModal()" class="px-5 py-2.5 text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+                        關閉
+                    </button>
+                    <button type="button" onclick="copyGeneratedScriptToClipboard()" class="px-5 py-2.5 text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition shadow-sm flex items-center">
+                        <i class="fa-solid fa-copy mr-1.5"></i> 複製 JavaScript 程式碼
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript 核心狀態與處理常式 -->
     <script>
         // 固定區塊常數 (不可刪除，清空時保留)
+        // modify by kentchuang_ai 20260919: 加入 responsibleActivityId (主責填寫關卡)
         const DEFAULT_FIXED_SECTION = {
             id: "sec_applicant",
             name: "申請人基本資料",
             fixed: true,
             desc: "EFGP 系統常設固定區塊，由系統全域變數與人員主檔自動帶入與唯讀鎖定。",
+            responsibleActivityId: "act_create",
             rows: [
                 { id: "row_app_1", name: "第 1 列", layout: "4-col" },
                 { id: "row_app_2", name: "第 2 列", layout: "4-col" }
@@ -1398,7 +1457,7 @@
                 type: "Text",
                 trigger: "formCreate (建立初始化)",
                 source: "系統變數 userOrganizationName",
-                behavior: "自動帶入登入者之主歸屬部門全名。",
+                behavior: "自動帶入申請人隸屬之部門名稱。",
                 validation: "全流程唯讀",
                 fixed: true,
                 perm: { s1: "唯讀", s2: "唯讀", s3: "唯讀", s4: "唯讀", s5: "唯讀", note: "" }
@@ -1410,16 +1469,16 @@
                 id: "txtApplyUserId",
                 type: "Text",
                 trigger: "formCreate (建立初始化)",
-                source: "系統全域變數 userId / 員工編號",
-                behavior: "自動帶入申請人之正式員工工號代碼。",
-                validation: "全流程唯讀",
+                source: "系統變數 userId",
+                behavior: "登入者員工編號，做為流程分派與權限校驗之主鍵鍵值。",
+                validation: "全流程唯讀，系統必填主鍵",
                 fixed: true,
-                perm: { s1: "唯讀", s2: "唯讀", s3: "唯讀", s4: "唯讀", s5: "唯讀", note: "" }
+                perm: { s1: "唯讀", s2: "唯讀", s3: "唯讀", s4: "唯讀", s5: "唯讀", note: "人員工號" }
             },
             {
                 section: "申請人基本資料",
                 targetRowId: "row_app_2",
-                label: "單號",
+                label: "表單單號",
                 id: "SerialNumber",
                 type: "Text",
                 trigger: "無特定事件 (純輸入)",
@@ -1432,11 +1491,13 @@
         ];
 
         // 範本：包含「會議決策 (單區塊多列樣板)」與「轉倉單身 (含SubTab)」
+        // modify by kentchuang_ai 20260919: 區塊皆綁定主責簽核關卡
         const SAMPLE_TRANS_SECTIONS = [
             {
                 id: "sec_applicant",
                 name: "申請人基本資料",
                 fixed: true,
+                responsibleActivityId: "act_create",
                 desc: "系統常設申請人基本資訊 (兩列四欄式)",
                 rows: [
                     { id: "row_app_1", name: "第 1 列", layout: "4-col" },
@@ -1447,6 +1508,7 @@
                 id: "sec_master",
                 name: "轉倉主檔資訊",
                 fixed: false,
+                responsibleActivityId: "act_create",
                 desc: "包含申請公司、轉出/轉入倉庫與範例下載按鈕",
                 rows: [ { id: "row_m_1", name: "主檔資訊列", layout: "3-col" } ]
             },
@@ -1454,6 +1516,7 @@
                 id: "sec_decision",
                 name: "會議決策",
                 fixed: false,
+                responsibleActivityId: "act_create",
                 desc: "【仿使用者附圖】單一區塊內混合三種列樣板（四欄式 + 1:2:1 式 + 雙欄式）！",
                 rows: [
                     { id: "row_dec_1", name: "第一列：處置選項 (四欄式)", layout: "4-col" },
@@ -1465,6 +1528,7 @@
                 id: "sec_detail",
                 name: "轉倉物料明細(含SubTab)",
                 fixed: false,
+                responsibleActivityId: "act_create",
                 desc: "透過 SubTab 頁籤切換「一般物料單身」與「工程重測備註」",
                 rows: [ { id: "row_g_1", name: "頁籤容器列", layout: "1-col" } ]
             },
@@ -1472,6 +1536,7 @@
                 id: "sec_flow",
                 name: "簽核承辦人分派",
                 fixed: false,
+                responsibleActivityId: "act_manager",
                 desc: "產品工程(PE)、品管(QCE)人員分派隱藏欄位與 SAP 過帳按鈕",
                 rows: [ { id: "row_f_1", name: "簽核分派列", layout: "3-col" } ]
             }
@@ -1710,8 +1775,13 @@
             }
         ];
 
-        // modify by kentchuang_ai 20260917: 預設僅提供申請填單與部門主管兩大標準關卡
+        // modify by kentchuang_ai 20260919: 預設僅有「申請人基本資料」區塊，對應 1 個關卡：申請填單 (Create)；新增另一個區塊時自動連動新增對應關卡
         const DEFAULT_ACTIVITIES = [
+            { id: "act_create", name: "關卡1: 申請填單 (Create)" }
+        ];
+
+        // 範本專用簽核關卡 (轉倉與會議決策範本)
+        const SAMPLE_TRANS_ACTIVITIES = [
             { id: "act_create", name: "關卡1: 申請填單 (Create)" },
             { id: "act_manager", name: "關卡2: 部門主管 (Manager)" }
         ];
@@ -1723,6 +1793,8 @@
         let gActiveSubTabItemMap = {};
         let gHasExported = false; // 追蹤是否已匯出相關設定值 (JSON / Markdown)
         let gAutoSaveTimer = null; // LocalStorage 自動儲存 debounce 計時器
+        // add by kentchuang_ai 20260919: 記錄權限矩陣中各區塊折疊狀態
+        let gCollapsedSectionsInPerm = {};
         const LOCAL_STORAGE_KEY = 'EFGP_FORM_SPEC_AUTO_DRAFT';
 
         // add by kentchuang_ai 20260917: 安全 HTML 轉義函式 (預防 XSS 與屬性字串破壞)
@@ -1736,6 +1808,14 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+
+        // add by kentchuang_ai 20260919: 安全轉義用於 inline JS 事件屬性 (如 onclick="fn(...)") 內的字串參數，防止 HTML Entity 解碼逃逸 DOM XSS
+        function escapeJsAttr(pStr) {
+            if (pStr === undefined || pStr === null) {
+                return "''";
+            }
+            return escapeHtml(JSON.stringify(String(pStr)));
         }
 
         // add by kentchuang_ai 20260917: 觸發 LocalStorage 自動儲存草稿 (Debounce 500ms)
@@ -1958,6 +2038,8 @@
             if (type === 'trans') {
                 gSectionList = JSON.parse(JSON.stringify(SAMPLE_TRANS_SECTIONS));
                 gFieldList = JSON.parse(JSON.stringify(SAMPLE_TRANS_FIELDS));
+                // modify by kentchuang_ai 20260919: 轉倉範本載入對應的範本簽核關卡
+                gActivityList = JSON.parse(JSON.stringify(SAMPLE_TRANS_ACTIVITIES));
                 gActiveSubTabItemMap = { "tabTransDetail": "tab_item_general" };
 
                 document.getElementById('formName').value = "轉倉與會議決策申請單";
@@ -2431,7 +2513,7 @@
                             <span><i class="fa-solid fa-table mr-1 text-purple-600"></i> 單身表格欄位</span>
                             <span class="bg-purple-200 text-purple-900 px-1.5 py-0.2 rounded font-bold">${colsCount} 欄</span>
                         </div>
-                        <button type="button" onclick="openEditFieldModalByFieldId('${escapeHtml(field.id)}')" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold rounded transition shadow-sm flex items-center justify-center">
+                        <button type="button" onclick="openEditFieldModalByFieldId(${escapeJsAttr(field.id)})" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold rounded transition shadow-sm flex items-center justify-center">
                             <i class="fa-solid fa-plus-minus mr-1"></i> 維護單身欄位清單 (Columns)
                         </button>
                         
@@ -2442,15 +2524,15 @@
                             <p class="text-[11px] text-purple-800 leading-tight">勾選該表格所需的操作按鈕，系統將自動產生標準按鈕事件規範 (如 [GridID]_add_onclick)。</p>
                             <div class="space-y-1.5 pt-1 text-xs">
                                 <label class="flex items-center space-x-2 p-1.5 bg-white rounded border border-purple-200 cursor-pointer hover:bg-purple-100/60 transition shadow-2xs">
-                                    <input type="checkbox" onchange="toggleGridAction('${escapeHtml(field.id)}', 'add', this.checked)" ${hasAdd ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
+                                    <input type="checkbox" onchange="toggleGridAction(${escapeJsAttr(field.id)}, 'add', this.checked)" ${hasAdd ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
                                     <span class="font-bold text-slate-800"><i class="fa-solid fa-plus text-emerald-600 mr-1"></i> 新增按鈕 (<span class="font-mono text-purple-700">${escapeHtml(field.id)}_add</span>)</span>
                                 </label>
                                 <label class="flex items-center space-x-2 p-1.5 bg-white rounded border border-purple-200 cursor-pointer hover:bg-purple-100/60 transition shadow-2xs">
-                                    <input type="checkbox" onchange="toggleGridAction('${escapeHtml(field.id)}', 'edit', this.checked)" ${hasEdit ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
+                                    <input type="checkbox" onchange="toggleGridAction(${escapeJsAttr(field.id)}, 'edit', this.checked)" ${hasEdit ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
                                     <span class="font-bold text-slate-800"><i class="fa-solid fa-pen text-blue-600 mr-1"></i> 修改按鈕 (<span class="font-mono text-purple-700">${escapeHtml(field.id)}_edit</span>)</span>
                                 </label>
                                 <label class="flex items-center space-x-2 p-1.5 bg-white rounded border border-purple-200 cursor-pointer hover:bg-purple-100/60 transition shadow-2xs">
-                                    <input type="checkbox" onchange="toggleGridAction('${escapeHtml(field.id)}', 'delete', this.checked)" ${hasDel ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
+                                    <input type="checkbox" onchange="toggleGridAction(${escapeJsAttr(field.id)}, 'delete', this.checked)" ${hasDel ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
                                     <span class="font-bold text-slate-800"><i class="fa-solid fa-trash text-rose-600 mr-1"></i> 刪除按鈕 (<span class="font-mono text-purple-700">${escapeHtml(field.id)}_delete</span>)</span>
                                 </label>
                             </div>
@@ -2466,7 +2548,7 @@
                             <span><i class="fa-solid fa-folder-tree mr-1 text-indigo-600"></i> 分頁頁籤清單</span>
                             <span class="bg-indigo-200 text-indigo-900 px-1.5 py-0.2 rounded font-bold">${tabsCount} 頁</span>
                         </div>
-                        <button type="button" onclick="openEditFieldModalByFieldId('${escapeHtml(field.id)}')" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded transition shadow-sm flex items-center justify-center">
+                        <button type="button" onclick="openEditFieldModalByFieldId(${escapeJsAttr(field.id)})" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded transition shadow-sm flex items-center justify-center">
                             <i class="fa-solid fa-plus-minus mr-1"></i> 維護分頁頁籤設定 (Tab Items)
                         </button>
                     </div>
@@ -2767,27 +2849,28 @@
                 // modify by kentchuang_ai 20260917: 支援區塊標題點擊重新命名與提供重命名/管理樣板快捷按鈕
                 const secHeader = document.createElement('div');
                 secHeader.className = "bg-[#2b3a4a] text-white px-4 py-2.5 flex items-center justify-between flex-wrap gap-2";
+                // modify by kentchuang_ai 20260919: 安全強化，sec.id 全面使用 escapeJsAttr 避免 inline onclick 屬性逃逸與 DOM XSS
                 secHeader.innerHTML = `
                     <div class="flex items-center space-x-2 font-black text-sm sm:text-base tracking-wide flex-wrap">
                         <i class="fa-solid fa-folder-closed text-slate-300"></i>
-                        <span class="hover:text-amber-300 cursor-pointer border-b border-dashed border-transparent hover:border-amber-300 transition" onclick="event.stopPropagation(); renameSection('${escapeHtml(sec.id)}')" title="點擊快速重新命名區塊">${escapeHtml(sec.name)}</span>
-                        <button type="button" onclick="event.stopPropagation(); renameSection('${escapeHtml(sec.id)}')" class="text-slate-300 hover:text-amber-300 p-1 text-xs" title="重新命名此區塊">
+                        <span class="hover:text-amber-300 cursor-pointer border-b border-dashed border-transparent hover:border-amber-300 transition" onclick="event.stopPropagation(); renameSection(${escapeJsAttr(sec.id)})" title="點擊快速重新命名區塊">${escapeHtml(sec.name)}</span>
+                        <button type="button" onclick="event.stopPropagation(); renameSection(${escapeJsAttr(sec.id)})" class="text-slate-300 hover:text-amber-300 p-1 text-xs" title="重新命名此區塊">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         ${sec.fixed ? '<span class="text-[11px] bg-slate-700 text-indigo-200 px-2 py-0.5 rounded font-semibold ml-1">常設</span>' : ''}
                     </div>
                     <div class="flex items-center space-x-1.5 text-xs flex-wrap">
-                        <button type="button" onclick="event.stopPropagation(); renameSection('${escapeHtml(sec.id)}')" class="bg-slate-700 hover:bg-slate-600 text-amber-300 border border-slate-600 px-2.5 py-1 rounded font-bold shadow-sm flex items-center" title="快速重新命名此區塊">
+                        <button type="button" onclick="event.stopPropagation(); renameSection(${escapeJsAttr(sec.id)})" class="bg-slate-700 hover:bg-slate-600 text-amber-300 border border-slate-600 px-2.5 py-1 rounded font-bold shadow-sm flex items-center" title="快速重新命名此區塊">
                             <i class="fa-solid fa-pen-to-square mr-1 text-amber-400"></i> 重命名
                         </button>
-                        <button type="button" onclick="event.stopPropagation(); openEditSectionModalById('${escapeHtml(sec.id)}')" class="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 px-2.5 py-1 rounded font-bold shadow-sm flex items-center" title="編輯區塊名稱、說明與多列樣板">
+                        <button type="button" onclick="event.stopPropagation(); openEditSectionModalById(${escapeJsAttr(sec.id)})" class="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 px-2.5 py-1 rounded font-bold shadow-sm flex items-center" title="編輯區塊名稱、說明與多列樣板">
                             <i class="fa-solid fa-sliders mr-1 text-indigo-300"></i> 管理樣板
                         </button>
                         <button type="button" onclick="event.stopPropagation(); quickAddRowTemplate('4-col');" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded font-bold shadow-sm flex items-center">
                             <i class="fa-solid fa-plus mr-1"></i> 新增列
                         </button>
                         ${!sec.fixed ? `
-                        <button type="button" onclick="event.stopPropagation(); deleteSection('${escapeHtml(sec.id)}')" class="text-red-300 hover:text-red-100 p-1 font-bold" title="刪除此區塊">
+                        <button type="button" onclick="event.stopPropagation(); deleteSection(${escapeJsAttr(sec.id)})" class="text-red-300 hover:text-red-100 p-1 font-bold" title="刪除此區塊">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>` : ''}
                     </div>
@@ -2838,18 +2921,18 @@
                         tRowTitle = "第 " + (rIdx + 1) + " 列";
                     }
 
-                    // modify by kentchuang_ai 20260918: 安全強化，tRowTitle 強制 escapeHtml 避免 DOM XSS
+                    // modify by kentchuang_ai 20260919: 安全強化，sec.id 與 row.id 全面使用 escapeJsAttr 避免 inline 事件屬性逃逸
                     rowContainer.innerHTML = `
                         <div class="efgp-row-header">
                             <span class="text-xs font-bold">${escapeHtml(tRowTitle)} 【${getLayoutName(row.layout)}】</span>
                             <div class="flex items-center space-x-1.5 text-xs">
-                                <button type="button" onclick="moveRowUp('${escapeHtml(sec.id)}', '${escapeHtml(row.id)}')" class="px-2 py-0.5 rounded font-bold text-[11px] transition flex items-center ${tUpClass}" ${tUpDisabled} title="將此列向上移動">
+                                <button type="button" onclick="moveRowUp(${escapeJsAttr(sec.id)}, ${escapeJsAttr(row.id)})" class="px-2 py-0.5 rounded font-bold text-[11px] transition flex items-center ${tUpClass}" ${tUpDisabled} title="將此列向上移動">
                                     <i class="fa-solid fa-arrow-up mr-0.5"></i>上移
                                 </button>
-                                <button type="button" onclick="moveRowDown('${escapeHtml(sec.id)}', '${escapeHtml(row.id)}')" class="px-2 py-0.5 rounded font-bold text-[11px] transition flex items-center ${tDownClass}" ${tDownDisabled} title="將此列向下移動">
+                                <button type="button" onclick="moveRowDown(${escapeJsAttr(sec.id)}, ${escapeJsAttr(row.id)})" class="px-2 py-0.5 rounded font-bold text-[11px] transition flex items-center ${tDownClass}" ${tDownDisabled} title="將此列向下移動">
                                     <i class="fa-solid fa-arrow-down mr-0.5"></i>下移
                                 </button>
-                                <select onchange="changeRowLayoutQuick('${escapeHtml(sec.id)}', '${escapeHtml(row.id)}', this.value)" class="text-[11px] bg-slate-700 text-white rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none font-bold">
+                                <select onchange="changeRowLayoutQuick(${escapeJsAttr(sec.id)}, ${escapeJsAttr(row.id)}, this.value)" class="text-[11px] bg-slate-700 text-white rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none font-bold">
                                     <option value="1-col" ${row.layout==='1-col'?'selected':''}>單欄式 (100%)</option>
                                     <option value="2-col" ${row.layout==='2-col'?'selected':''}>雙欄式 (50%:50%)</option>
                                     <option value="3-col" ${row.layout==='3-col'?'selected':''}>三欄式 (33%×3)</option>
@@ -2858,7 +2941,7 @@
                                     <option value="2-1" ${row.layout==='2-1'?'selected':''}>2:1 式 (8:4)</option>
                                     <option value="1-2-1" ${row.layout==='1-2-1'?'selected':''}>1:2:1 式 (3:6:3)</option>
                                 </select>
-                                <button type="button" onclick="deleteRowInDesigner('${escapeHtml(sec.id)}', '${escapeHtml(row.id)}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-1.5 py-0.5 rounded font-bold" title="刪除此列">
+                                <button type="button" onclick="deleteRowInDesigner(${escapeJsAttr(sec.id)}, ${escapeJsAttr(row.id)})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-1.5 py-0.5 rounded font-bold" title="刪除此列">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
                             </div>
@@ -3275,23 +3358,50 @@
             return rows;
         }
 
+        // 動態填入區塊主責填寫關卡選項 (modify by kentchuang_ai 20260919: 支援新增區塊自動建立專屬關卡，區塊=關卡)
+        function populateSectionRespActivityOptions(selectedActId, isNewSection = false) {
+            const selectElem = document.getElementById('sectionRespActivityInput');
+            if (!selectElem) return;
+            let optionsHTML = '';
+
+            if (isNewSection) {
+                optionsHTML += '<option value="__auto_create__" selected>⚡ 自動建立對應填寫關卡 (區塊 = 關卡)</option>';
+                gActivityList.forEach(act => {
+                    optionsHTML += `<option value="${escapeHtml(act.id)}">併入既有關卡：${escapeHtml(act.name)}</option>`;
+                });
+                optionsHTML += '<option value="">-- 無特定關卡 / 跨關卡維護 --</option>';
+            } else {
+                optionsHTML += '<option value="">-- 無特定關卡 / 跨關卡維護 --</option>';
+                gActivityList.forEach(act => {
+                    const isSel = (act.id === selectedActId);
+                    optionsHTML += `<option value="${escapeHtml(act.id)}" ${isSel ? 'selected' : ''}>${escapeHtml(act.name)}</option>`;
+                });
+                optionsHTML += '<option value="__auto_create__">⚡ 重新建立並綁定專屬新關卡</option>';
+            }
+            selectElem.innerHTML = optionsHTML;
+        }
+
         // 開啟新增區塊 Modal
+        // modify by kentchuang_ai 20260919: 預設自動建立專屬關卡 (區塊 = 關卡)
         function openAddSectionModal() {
             document.getElementById('sectionEditIndex').value = "-1";
             document.getElementById('sectionModalTitle').innerHTML = '<i class="fa-solid fa-layer-group mr-2.5"></i> 新增表單區塊與多列欄位樣板 (Rows)';
             document.getElementById('sectionForm').reset();
+            populateSectionRespActivityOptions('', true);
             document.getElementById('sectionRowsContainer').innerHTML = '';
             addSectionRowItem('', '第 1 列', '2-col');
             document.getElementById('sectionModal').classList.remove('hidden');
         }
 
         // 編輯區塊
+        // modify by kentchuang_ai 20260919: 帶入既有主責關卡
         function editSectionItem(idx) {
             const sec = gSectionList[idx];
             document.getElementById('sectionEditIndex').value = idx;
             document.getElementById('sectionModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2.5"></i> 編輯區塊名稱與多列樣板配置';
             document.getElementById('sectionNameInput').value = sec.name;
             document.getElementById('sectionDescInput').value = sec.desc || '';
+            populateSectionRespActivityOptions(sec.responsibleActivityId || '', false);
 
             const container = document.getElementById('sectionRowsContainer');
             container.innerHTML = '';
@@ -3310,48 +3420,99 @@
         }
 
         // 儲存區塊
+        // modify by kentchuang_ai 20260919: 新增區塊時自動連動新增對應簽核關卡 (區塊 = 關卡)，改名時同步連動更新關卡名稱
         function saveSectionItem(e) {
             triggerAutoSaveDraft();
             e.preventDefault();
             const editIdx = parseInt(document.getElementById('sectionEditIndex').value, 10);
             const name = document.getElementById('sectionNameInput').value.trim();
             const desc = document.getElementById('sectionDescInput').value.trim();
+            let respActId = document.getElementById('sectionRespActivityInput').value;
             const rows = collectSectionRows();
 
             if (editIdx >= 0) {
                 const oldName = gSectionList[editIdx].name;
+                const oldRespActId = gSectionList[editIdx].responsibleActivityId;
+
+                // 若選擇重新建立專屬關卡
+                if (respActId === '__auto_create__') {
+                    const newActId = `act_${Date.now()}`;
+                    const newActName = `關卡${gActivityList.length + 1}: ${name}`;
+                    gActivityList.push({ id: newActId, name: newActName });
+                    respActId = newActId;
+
+                    // 初始化既有欄位在此關卡之權限
+                    gFieldList.forEach(f => {
+                        if (!f.permissions) f.permissions = {};
+                        if (f.section === name) {
+                            f.permissions[newActId] = '可編輯';
+                        } else {
+                            f.permissions[newActId] = '唯讀';
+                        }
+                    });
+                }
+
                 gSectionList[editIdx].name = name;
                 gSectionList[editIdx].desc = desc;
+                gSectionList[editIdx].responsibleActivityId = respActId;
                 gSectionList[editIdx].rows = rows;
-                gSectionList[editIdx].layout = rows[0].layout;
+                gSectionList[editIdx].layout = (rows && rows.length > 0) ? rows[0].layout : "2-col";
 
                 if (oldName !== name) {
                     gFieldList.forEach(f => {
                         if (f.section === oldName) f.section = name;
                     });
+                    // 連動更新關卡名稱
+                    if (respActId) {
+                        const act = gActivityList.find(a => a.id === respActId);
+                        if (act && act.name.includes(oldName)) {
+                            act.name = act.name.replace(oldName, name);
+                        }
+                    }
                 }
             } else {
                 if (gSectionList.some(s => s.name === name)) {
                     alert("已存在相同名稱的區塊，請更換區塊名稱！");
                     return;
                 }
+
+                // 新增區塊時：若為自動建立或未指定，連動為該區塊新增一個對應關卡 (區塊 = 關卡)
+                if (respActId === '__auto_create__' || !respActId) {
+                    const newActId = `act_${Date.now()}`;
+                    const newActName = `關卡${gActivityList.length + 1}: ${name}`;
+                    gActivityList.push({
+                        id: newActId,
+                        name: newActName
+                    });
+                    respActId = newActId;
+
+                    // 現有歷史區塊的欄位在新關卡一律唯讀
+                    gFieldList.forEach(f => {
+                        if (!f.permissions) f.permissions = {};
+                        f.permissions[newActId] = '唯讀';
+                    });
+                }
+
                 gSectionList.push({
                     id: `sec_${Date.now()}`,
                     name: name,
                     fixed: false,
+                    responsibleActivityId: respActId,
                     desc: desc,
                     rows: rows,
-                    layout: rows[0].layout
+                    layout: (rows && rows.length > 0) ? rows[0].layout : "2-col"
                 });
             }
 
             closeSectionModal();
             renderDesignerUI();
             renderMatrixTable();
+            renderPermissionTable();
             gHasExported = false;
         }
 
         // 刪除區塊
+        // modify by kentchuang_ai 20260919: 若該區塊具專屬關卡且無其他區塊共用，連動清理專屬關卡
         function deleteSectionItem(idx) {
             const sec = gSectionList[idx];
             const fieldCount = gFieldList.filter(f => f.section === sec.name).length;
@@ -3361,6 +3522,20 @@
             }
 
             if (confirm(msg)) {
+                // 檢查是否需連動刪除專屬關卡 (排除 act_create 與共用關卡)
+                const targetActId = sec.responsibleActivityId;
+                if (targetActId && targetActId !== 'act_create' && gActivityList.length > 1) {
+                    const isShared = gSectionList.some((s, sIdx) => sIdx !== idx && s.responsibleActivityId === targetActId);
+                    if (!isShared) {
+                        gActivityList = gActivityList.filter(a => a.id !== targetActId);
+                        gFieldList.forEach(f => {
+                            if (f.permissions && f.permissions[targetActId]) {
+                                delete f.permissions[targetActId];
+                            }
+                        });
+                    }
+                }
+
                 gFieldList = gFieldList.filter(f => f.section !== sec.name);
                 gSectionList.splice(idx, 1);
                 renderDesignerUI();
@@ -3422,6 +3597,14 @@
                     f.section = tNewName;
                 }
             });
+
+            // modify by kentchuang_ai 20260919: 連動更新該區塊專屬關卡名稱
+            if (tSec.responsibleActivityId) {
+                let tAct = gActivityList.find(a => a.id === tSec.responsibleActivityId);
+                if (tAct && tAct.name.includes(tOldName)) {
+                    tAct.name = tAct.name.replace(tOldName, tNewName);
+                }
+            }
 
             // 若右側屬性面板當前開啟的欄位屬於此區塊，同步更新下拉選單
             let tCurOpenFieldId = document.getElementById('propFieldId').value;
@@ -3639,7 +3822,7 @@
                 <tr class="hover:bg-purple-50/40">
                     ${cols.map((col, idx) => `
                         <td class="p-2 border-r border-purple-100 text-slate-700 whitespace-nowrap font-mono text-[11px]">
-                            ${getSampleVal(col.id, col.caption, 0)}
+                            ${escapeHtml(getSampleVal(col.id, col.caption, 0))}
                         </td>
                     `).join('')}
                 </tr>
@@ -4162,7 +4345,7 @@
             }
         }
 
-        // modify by kentchuang_ai 20260917: 渲染關卡權限矩陣表 (動態關卡、可編輯/唯讀/隱藏/停用下拉選單與即時雙向綁定)
+        // modify by kentchuang_ai 20260919: 升級關卡權限矩陣表 (支援依區塊分群折疊、區塊級快速權限批次、主責關卡標註)
         function renderPermissionTable() {
             const thead = document.getElementById('permissionTableHead');
             const tbody = document.getElementById('permissionTableBody');
@@ -4176,37 +4359,37 @@
 
             // 1. 動態生成表頭
             let headHTML = `<tr>
-                <th class="py-3.5 px-4 text-left w-56">欄位名稱 (ID)</th>`;
+                <th class="py-3.5 px-4 text-left w-72 bg-slate-100 text-slate-800">表單區塊與欄位名稱 (ID)</th>`;
 
             gActivityList.forEach((act, actIdx) => {
                 headHTML += `
-                    <th class="py-3 px-3 text-center min-w-[140px] ${actIdx === 0 ? 'bg-indigo-50/80 text-indigo-950' : 'bg-slate-100 text-slate-800'} border-l border-slate-200">
+                    <th class="py-3 px-3 text-center min-w-[150px] ${actIdx === 0 ? 'bg-indigo-50/80 text-indigo-950' : 'bg-slate-100 text-slate-800'} border-l border-slate-200">
                         <div class="flex items-center justify-between gap-1 mb-1">
                             <span class="font-bold text-xs sm:text-sm truncate" title="${escapeHtml(act.name)}">${escapeHtml(act.name)}</span>
                             <div class="flex items-center space-x-1 no-print">
-                                <button type="button" onclick="openEditActivityModal('${escapeHtml(act.id)}')" title="重新命名關卡" class="text-slate-400 hover:text-indigo-600 text-xs p-1">
+                                <button type="button" onclick="openEditActivityModal(${escapeJsAttr(act.id)})" title="重新命名關卡" class="text-slate-400 hover:text-indigo-600 text-xs p-1">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                                 ${gActivityList.length > 1 ? `
-                                <button type="button" onclick="deleteActivity('${escapeHtml(act.id)}')" title="刪除此關卡" class="text-slate-400 hover:text-rose-600 text-xs p-1">
+                                <button type="button" onclick="deleteActivity(${escapeJsAttr(act.id)})" title="刪除此關卡" class="text-slate-400 hover:text-rose-600 text-xs p-1">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>` : ''}
                             </div>
                         </div>
                         <div class="flex items-center justify-center space-x-1 no-print pt-1 border-t border-slate-200/80">
-                            <button type="button" onclick="batchSetActivityPerm('${escapeHtml(act.id)}', '唯讀')" title="此關卡全設唯讀" class="px-1.5 py-0.5 text-[11px] bg-slate-200/90 hover:bg-slate-300 text-slate-700 rounded font-normal">全唯讀</button>
-                            <button type="button" onclick="batchSetActivityPerm('${escapeHtml(act.id)}', '可編輯')" title="此關卡全設編輯" class="px-1.5 py-0.5 text-[11px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-normal">全編輯</button>
+                            <button type="button" onclick="batchSetActivityPerm(${escapeJsAttr(act.id)}, '唯讀')" title="此關卡全設唯讀" class="px-1.5 py-0.5 text-[11px] bg-slate-200/90 hover:bg-slate-300 text-slate-700 rounded font-normal">全唯讀</button>
+                            <button type="button" onclick="batchSetActivityPerm(${escapeJsAttr(act.id)}, '可編輯')" title="此關卡全設編輯" class="px-1.5 py-0.5 text-[11px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-normal">全編輯</button>
                         </div>
                     </th>`;
             });
 
             headHTML += `
-                <th class="py-3.5 px-4 text-left min-w-[220px] border-l border-slate-200">備註說明 / 條件式權限</th>
-                <th class="py-3.5 px-3 text-center w-28 no-print border-l border-slate-200">列快捷</th>
+                <th class="py-3.5 px-4 text-left min-w-[200px] border-l border-slate-200 bg-slate-100 text-slate-800">備註說明 / 條件式權限</th>
+                <th class="py-3.5 px-3 text-center w-24 no-print border-l border-slate-200 bg-slate-100 text-slate-800">操作</th>
             </tr>`;
             thead.innerHTML = headHTML;
 
-            // 2. 動態生成表身
+            // 2. 動態生成表身 (依區塊分群)
             tbody.innerHTML = '';
 
             if (gFieldList.length === 0) {
@@ -4214,18 +4397,8 @@
                 return;
             }
 
-            gFieldList.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 border-b border-slate-200 text-sm";
-
-                let rowNote = '';
-                if (item.targetRowId) {
-                    const sec = gSectionList.find(s => s.name === item.section);
-                    const r = sec && sec.rows ? sec.rows.find(row => row.id === item.targetRowId) : null;
-                    if (r) rowNote = ` (置於 ${r.name})`;
-                }
-
-                // 確保 permissions 物件存在
+            // 輔助函式：確保欄位 permissions 物件完整
+            function ensureFieldPermissions(item) {
                 if (!item.permissions) {
                     item.permissions = {};
                     if (item.perm) {
@@ -4237,17 +4410,35 @@
                         });
                     }
                 }
-                const noteVal = item.permNote !== undefined ? item.permNote : (item.perm && item.perm.note ? item.perm.note : (item.validation || ''));
+            }
 
+            // 輔助函式：渲染單一欄位列
+            function renderFieldRow(item) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-indigo-50/40 border-b border-slate-200 text-sm transition";
+
+                ensureFieldPermissions(item);
+
+                let rowNote = '';
+                if (item.targetRowId) {
+                    const sec = gSectionList.find(s => s.name === item.section);
+                    const r = sec && sec.rows ? sec.rows.find(row => row.id === item.targetRowId) : null;
+                    if (r) rowNote = ` (${r.name})`;
+                }
+
+                const noteVal = item.permNote !== undefined ? item.permNote : (item.perm && item.perm.note ? item.perm.note : (item.validation || ''));
                 const isSerial = item.id === 'SerialNumber';
 
                 let rowHTML = `
-                    <td class="py-3 px-4 font-bold text-slate-900 align-middle">
-                        ${escapeHtml(item.label)}
-                        <div class="text-xs font-mono text-indigo-700 font-bold flex items-center flex-wrap gap-1 mt-0.5">
+                    <td class="py-2.5 pl-8 pr-4 font-bold text-slate-900 align-middle">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-slate-400">↳</span>
+                            <span class="text-slate-800">${escapeHtml(item.label)}</span>
+                        </div>
+                        <div class="text-xs font-mono text-indigo-700 font-bold flex items-center flex-wrap gap-1 mt-0.5 ml-4">
                             <span>${escapeHtml(item.id)}</span>
-                            ${rowNote ? `<span class="text-slate-500 font-normal">${escapeHtml(rowNote)}</span>` : ''}
-                            ${isSerial ? `<span class="text-[11px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">⚠️禁設 disable</span>` : ''}
+                            ${rowNote ? `<span class="text-slate-400 font-normal">${escapeHtml(rowNote)}</span>` : ''}
+                            ${isSerial ? `<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded font-bold">⚠️禁設 disable</span>` : ''}
                         </div>
                     </td>`;
 
@@ -4258,7 +4449,6 @@
                         item.permissions[act.id] = perm;
                     }
 
-                    // 依據選擇值設定色彩樣式
                     let selectColorClass = "bg-white text-slate-700 border-slate-300";
                     if (perm.includes("可編輯") || perm === "編輯") selectColorClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-bold";
                     else if (perm.includes("唯讀")) selectColorClass = "bg-slate-100 text-slate-700 border-slate-300 font-medium";
@@ -4266,8 +4456,8 @@
                     else if (perm.includes("停用")) selectColorClass = "bg-amber-50 text-amber-800 border-amber-300";
 
                     rowHTML += `
-                        <td class="py-2.5 px-2 text-center align-middle border-l border-slate-200">
-                            <select onchange="updateFieldPerm('${escapeHtml(item.id)}', '${escapeHtml(act.id)}', this.value)" 
+                        <td class="py-2 px-2 text-center align-middle border-l border-slate-200">
+                            <select onchange="updateFieldPerm(${escapeJsAttr(item.id)}, ${escapeJsAttr(act.id)}, this.value)" 
                                     class="w-full text-xs px-2 py-1.5 rounded border focus:ring-2 focus:ring-indigo-500 focus:outline-none transition ${selectColorClass}">
                                 <option value="可編輯" ${perm === '可編輯' || perm === '編輯' ? 'selected' : ''}>可編輯 (Editable)</option>
                                 <option value="唯讀" ${perm === '唯讀' ? 'selected' : ''}>唯讀 (Readonly)</option>
@@ -4280,19 +4470,307 @@
                 rowHTML += `
                     <td class="py-2 px-3 align-middle border-l border-slate-200">
                         <input type="text" value="${escapeHtml(noteVal)}" 
-                               onchange="updateFieldPermNote('${escapeHtml(item.id)}', this.value)"
+                               onchange="updateFieldPermNote(${escapeJsAttr(item.id)}, this.value)"
                                placeholder="特殊條件或說明..." 
                                class="w-full text-xs px-2.5 py-1.5 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 rounded bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                     </td>
                     <td class="py-2 px-2 text-center align-middle no-print border-l border-slate-200">
                         <div class="flex items-center justify-center space-x-1">
-                            <button type="button" onclick="batchSetRowPerm('${escapeHtml(item.id)}', '唯讀')" title="將此列所有關卡設為唯讀" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium">全唯讀</button>
-                            <button type="button" onclick="batchSetRowPerm('${escapeHtml(item.id)}', '可編輯')" title="將此列所有關卡設為可編輯" class="px-2 py-1 text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded font-medium">全編輯</button>
+                            <button type="button" onclick="batchSetRowPerm(${escapeJsAttr(item.id)}, '唯讀')" title="此欄位在所有關卡皆唯讀" class="px-1.5 py-0.5 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium">全唯</button>
+                            <button type="button" onclick="batchSetRowPerm(${escapeJsAttr(item.id)}, '可編輯')" title="此欄位在所有關卡皆可編輯" class="px-1.5 py-0.5 text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded font-medium">全編</button>
                         </div>
                     </td>`;
 
                 tr.innerHTML = rowHTML;
                 tbody.appendChild(tr);
+            }
+
+            // 依照區塊依序渲染
+            gSectionList.forEach(sec => {
+                const secFields = gFieldList.filter(f => f.section === sec.name);
+                const isCollapsed = !!gCollapsedSectionsInPerm[sec.name];
+                const respAct = gActivityList.find(a => a.id === sec.responsibleActivityId);
+
+                // 產生區塊分組標題列 (Section Group Header Row)
+                const secTr = document.createElement('tr');
+                secTr.className = "bg-slate-100/95 border-t-2 border-b border-slate-300 font-extrabold text-slate-800 text-xs sm:text-sm";
+
+                let secHTML = `
+                    <td class="py-2.5 px-3 align-middle">
+                        <div class="flex items-center justify-between flex-wrap gap-1">
+                            <div class="flex items-center space-x-2 cursor-pointer select-none" onclick="toggleSectionPermCollapse(${escapeJsAttr(sec.name)})">
+                                <i class="fa-solid ${isCollapsed ? 'fa-circle-chevron-right text-slate-500' : 'fa-circle-chevron-down text-indigo-600'} text-sm transition"></i>
+                                <span class="text-slate-900 text-sm sm:text-base font-extrabold">${escapeHtml(sec.name)}</span>
+                                <span class="bg-slate-200 text-slate-700 text-[11px] px-2 py-0.5 rounded-full font-bold">${secFields.length} 欄</span>
+                            </div>
+                            <div>
+                                ${respAct ? `
+                                    <span class="inline-flex items-center text-[11px] bg-indigo-100 text-indigo-900 border border-indigo-200 px-2 py-0.5 rounded-full font-bold" title="此區塊預設由此關卡負責填寫">
+                                        <i class="fa-solid fa-user-check text-indigo-600 mr-1"></i>主責: ${escapeHtml(respAct.name)}
+                                    </span>
+                                ` : `
+                                    <span class="text-[11px] text-slate-500 italic bg-white/80 px-2 py-0.5 rounded border border-slate-200">跨關卡維護</span>
+                                `}
+                            </div>
+                        </div>
+                    </td>`;
+
+                // 各關卡區塊快速批次設定按鈕
+                gActivityList.forEach(act => {
+                    const isRespAct = (sec.responsibleActivityId === act.id);
+                    secHTML += `
+                        <td class="py-2 px-1 text-center align-middle border-l border-slate-200 ${isRespAct ? 'bg-indigo-50/40' : ''}">
+                            <div class="flex items-center justify-center space-x-1 no-print">
+                                <button type="button" onclick="batchSetSectionPerm(${escapeJsAttr(sec.name)}, ${escapeJsAttr(act.id)}, '可編輯')" 
+                                        title="將【${escapeHtml(sec.name)}】在【${escapeHtml(act.name)}】全設為可編輯" 
+                                        class="px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold transition shadow-2xs">
+                                    全編
+                                </button>
+                                <button type="button" onclick="batchSetSectionPerm(${escapeJsAttr(sec.name)}, ${escapeJsAttr(act.id)}, '唯讀')" 
+                                        title="將【${escapeHtml(sec.name)}】在【${escapeHtml(act.name)}】全設為唯讀" 
+                                        class="px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-slate-300 hover:bg-slate-400 text-slate-800 rounded font-medium transition shadow-2xs">
+                                    全唯
+                                </button>
+                                <button type="button" onclick="batchSetSectionPerm(${escapeJsAttr(sec.name)}, ${escapeJsAttr(act.id)}, '隱藏')" 
+                                        title="將【${escapeHtml(sec.name)}】在【${escapeHtml(act.name)}】全設為隱藏" 
+                                        class="px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-600 rounded font-normal transition">
+                                    全隱
+                                </button>
+                            </div>
+                        </td>`;
+                });
+
+                secHTML += `
+                    <td class="py-2 px-3 align-middle border-l border-slate-200 text-xs text-slate-500 italic">
+                        ${escapeHtml(sec.desc || '區塊整體權限批次快速控制')}
+                    </td>
+                    <td class="py-2 px-2 text-center align-middle no-print border-l border-slate-200">
+                        <button type="button" onclick="toggleSectionPermCollapse(${escapeJsAttr(sec.name)})" class="text-xs text-indigo-700 hover:underline font-bold">
+                            ${isCollapsed ? '展開' : '收合'}
+                        </button>
+                    </td>`;
+
+                secTr.innerHTML = secHTML;
+                tbody.appendChild(secTr);
+
+                // 若未折疊，依序顯示區塊內部各欄位
+                if (!isCollapsed) {
+                    if (secFields.length === 0) {
+                        const emptyTr = document.createElement('tr');
+                        emptyTr.innerHTML = `<td colspan="${gActivityList.length + 3}" class="py-3 pl-8 text-xs text-slate-400 italic bg-white">此區塊內目前無任何欄位。</td>`;
+                        tbody.appendChild(emptyTr);
+                    } else {
+                        secFields.forEach(item => {
+                            renderFieldRow(item);
+                        });
+                    }
+                }
+            });
+
+            // 處理未歸屬於任何現有區塊的孤立欄位 (Orphaned Fields)
+            const orphanedFields = gFieldList.filter(f => !gSectionList.some(s => s.name === f.section));
+            if (orphanedFields.length > 0) {
+                const orphanTr = document.createElement('tr');
+                orphanTr.className = "bg-amber-100/80 border-t-2 border-b border-amber-300 font-extrabold text-amber-950 text-xs sm:text-sm";
+                orphanTr.innerHTML = `
+                    <td colspan="${gActivityList.length + 3}" class="py-2.5 px-4">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i>
+                        其他 / 未分類區塊欄位 (${orphanedFields.length} 欄)
+                    </td>
+                `;
+                tbody.appendChild(orphanTr);
+                orphanedFields.forEach(item => {
+                    renderFieldRow(item);
+                });
+            }
+        }
+
+        // 切換區塊在權限矩陣中的折疊/展開狀態
+        // add by kentchuang_ai 20260919
+        function toggleSectionPermCollapse(secName) {
+            gCollapsedSectionsInPerm[secName] = !gCollapsedSectionsInPerm[secName];
+            renderPermissionTable();
+        }
+
+        // 區塊級批次設定特定關卡所有欄位之權限
+        // add by kentchuang_ai 20260919
+        function batchSetSectionPerm(secName, actId, permValue) {
+            triggerAutoSaveDraft();
+            const act = gActivityList.find(a => a.id === actId);
+            const actName = act ? act.name : actId;
+
+            let count = 0;
+            gFieldList.forEach(item => {
+                if (item.section === secName) {
+                    if (!item.permissions) item.permissions = {};
+                    if (item.id === 'SerialNumber' && permValue === '停用') {
+                        item.permissions[actId] = '唯讀';
+                    } else {
+                        item.permissions[actId] = permValue;
+                    }
+                    count++;
+                }
+            });
+
+            renderPermissionTable();
+            gHasExported = false;
+        }
+
+        // add by kentchuang_ai 20260919: 依各區塊主責填寫關卡自動推導全表欄位權限
+        function applyAutoDerivePermissions() {
+            const hasResponsibleConfig = gSectionList.some(s => !!s.responsibleActivityId);
+            let confirmMsg = "【依區塊權責自動推導權限】\n\n系統將依照每個區塊所設定的「主責填寫關卡」自動計算：\n";
+            confirmMsg += "1. 當流程走到該關卡時，其主責區塊自動為「可編輯」。\n";
+            confirmMsg += "2. 歷史走過的區塊自動切換為「唯讀」。\n";
+            confirmMsg += "3. 未到之區塊自動為「唯讀」。\n";
+            confirmMsg += "4. 系統常設欄位與 SerialNumber 一律保持「唯讀」，嚴禁 disable。\n\n";
+            confirmMsg += "是否立即套用並重新計算所有欄位權限？";
+
+            if (!confirm(confirmMsg)) return;
+
+            triggerAutoSaveDraft();
+
+            gFieldList.forEach(item => {
+                if (!item.permissions) item.permissions = {};
+
+                // SerialNumber 與固定常設系統欄位一律維持唯讀
+                if (item.id === 'SerialNumber' || item.fixed) {
+                    gActivityList.forEach(act => {
+                        item.permissions[act.id] = '唯讀';
+                    });
+                    return;
+                }
+
+                const sec = gSectionList.find(s => s.name === item.section);
+                const respActId = sec ? sec.responsibleActivityId : null;
+
+                if (!respActId) {
+                    // 若區塊無指定特定關卡，預設第一個關卡可填，其餘唯讀
+                    gActivityList.forEach((act, aIdx) => {
+                        item.permissions[act.id] = (aIdx === 0) ? '可編輯' : '唯讀';
+                    });
+                } else {
+                    const respIdx = gActivityList.findIndex(a => a.id === respActId);
+                    gActivityList.forEach((act, aIdx) => {
+                        if (act.id === respActId) {
+                            item.permissions[act.id] = '可編輯';
+                        } else if (aIdx > respIdx) {
+                            // 後續關卡，歷史已填寫，鎖定唯讀
+                            item.permissions[act.id] = '唯讀';
+                        } else {
+                            // 前置尚未到達關卡，預設唯讀
+                            item.permissions[act.id] = '唯讀';
+                        }
+                    });
+                }
+            });
+
+            renderPermissionTable();
+            gHasExported = false;
+            alert("✓ 已成功依照區塊主責關卡自動推導所有欄位權限！");
+        }
+
+        // add by kentchuang_ai 20260919: 產生標準 EFGP setFieldControl() JavaScript 腳本
+        function generateSetFieldControlCode() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+
+            let code = `// add by kentchuang_ai ${dateStr}\n`;
+            code += `// =========================================================================\n`;
+            code += `// EFGP 集中式欄位權限控制函式 (setFieldControl)\n`;
+            code += `// 依照流程關卡統一控制表單各區塊與元件之編輯 (Editable)、唯讀 (Readonly) 與隱藏 (Hidden)\n`;
+            code += `// 規範：SerialNumber 表單流水號元件嚴禁 disable！一律使用 FormUtil 工具庫控制\n`;
+            code += `// =========================================================================\n`;
+            code += `function setFieldControl() {\n`;
+            code += `    var tActivityId = "";\n`;
+            code += `    if (typeof getActivityId === "function") {\n`;
+            code += `        tActivityId = getActivityId();\n`;
+            code += `    } else if (typeof FormUtil !== "undefined" && typeof FormUtil.getValue === "function") {\n`;
+            code += `        tActivityId = FormUtil.getValue("activityId");\n`;
+            code += `    }\n\n`;
+
+            gActivityList.forEach((act, actIdx) => {
+                const ifStmt = actIdx === 0 ? `    if (tActivityId == "${act.id}" || tActivityId == "") {` : `    } else if (tActivityId == "${act.id}") {`;
+                code += `${ifStmt}\n`;
+                code += `        // -----------------------------------------------------------------\n`;
+                code += `        // 關卡 ${actIdx + 1}: ${act.name} (${act.id})\n`;
+                code += `        // -----------------------------------------------------------------\n`;
+
+                gSectionList.forEach(sec => {
+                    const secFields = gFieldList.filter(f => f.section === sec.name && f.id !== 'SerialNumber');
+                    if (secFields.length === 0) return;
+
+                    const disabledList = [];
+                    const enabledList = [];
+                    const hiddenList = [];
+
+                    secFields.forEach(f => {
+                        const perm = (f.permissions && f.permissions[act.id]) ? f.permissions[act.id] : (actIdx === 0 && !f.fixed ? '可編輯' : '唯讀');
+                        if (perm.includes('可編輯') || perm === '編輯') {
+                            enabledList.push(f.id);
+                        } else if (perm.includes('隱藏')) {
+                            hiddenList.push(f.id);
+                        } else {
+                            disabledList.push(f.id);
+                        }
+                    });
+
+                    code += `        // 【${sec.name}】區塊欄位控制\n`;
+                    if (enabledList.length > 0) {
+                        code += `        FormUtil.disable(${JSON.stringify(enabledList)}, false);\n`;
+                    }
+                    if (disabledList.length > 0) {
+                        code += `        FormUtil.disable(${JSON.stringify(disabledList)}, true);\n`;
+                    }
+                    if (hiddenList.length > 0) {
+                        code += `        FormUtil.hide(${JSON.stringify(hiddenList)});\n`;
+                    }
+                });
+
+                code += `\n`;
+            });
+
+            code += `    }\n`;
+            code += `}\n`;
+            return code;
+        }
+
+        // 打開產生 JS 腳本 Modal
+        // add by kentchuang_ai 20260919
+        function openScriptGeneratorModal() {
+            const code = generateSetFieldControlCode();
+            const codeElem = document.getElementById('generatedScriptCode');
+            if (codeElem) {
+                codeElem.textContent = code;
+            }
+            const msgElem = document.getElementById('copyScriptSuccessMsg');
+            if (msgElem) msgElem.classList.add('hidden');
+            document.getElementById('scriptGeneratorModal').classList.remove('hidden');
+        }
+
+        // 關閉產生 JS 腳本 Modal
+        function closeScriptGeneratorModal() {
+            document.getElementById('scriptGeneratorModal').classList.add('hidden');
+        }
+
+        // 複製產生的腳本至剪貼簿
+        function copyGeneratedScriptToClipboard() {
+            const codeElem = document.getElementById('generatedScriptCode');
+            if (!codeElem) return;
+            navigator.clipboard.writeText(codeElem.textContent).then(() => {
+                const msgElem = document.getElementById('copyScriptSuccessMsg');
+                if (msgElem) {
+                    msgElem.classList.remove('hidden');
+                    setTimeout(() => {
+                        msgElem.classList.add('hidden');
+                    }, 3000);
+                }
+            }).catch(err => {
+                console.error("複製失敗：", err);
+                alert("複製失敗，請手動全選複製！");
             });
         }
 
@@ -4455,10 +4933,10 @@
             }
         }
 
-        // modify by kentchuang_ai 20260917: 恢復預設關卡 (2 個關卡)
+        // modify by kentchuang_ai 20260919: 恢復預設關卡 (1 個關卡：申請填單)
         function resetActivitiesToDefault() {
             triggerAutoSaveDraft();
-            if (confirm("確定要將關卡重置為預設的 2 個關卡嗎？")) {
+            if (confirm("確定要將關卡重置為預設的 1 個關卡（申請填單）嗎？")) {
                 gActivityList = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
                 renderPermissionTable();
                 gHasExported = false;
@@ -4605,7 +5083,7 @@
                     triggerAutoSaveDraft();
                     const activitiesNote = (parsedData.activities && Array.isArray(parsedData.activities) && parsedData.activities.length > 0)
                         ? ""
-                        : "\n\n⚠️ 提醒：.form 原始檔無法可靠解析出關卡權限 (Activities) 設定，已保留目前的關卡清單未變動，請至「關卡權限矩陣」頁籤手動確認/設定各關卡權限。";
+                        : "\n\n⚠️ 提醒：.form 原始檔無法可靠解析出關卡權限 (Activities) 設定，已保留目前的關卡清單未變動，請至「區塊權限矩陣」頁籤手動確認/設定各關卡權限。";
                     alert(`【.form 原始檔逆向工程成功】\n已成功解析表單「${parsedData.formMeta.formName}」！\n共載入 ${gSectionList.length} 個區塊、${gFieldList.length} 個表單元件。${activitiesNote}`);
                 } catch (err) {
                     console.error("解析 .form 發生錯誤：", err);
@@ -5168,8 +5646,10 @@
 
             md += `## 2. 表單區塊架構與多列樣板清單 (Rows Layout)\n\n`;
             gSectionList.forEach((sec, i) => {
+                const respAct = gActivityList.find(a => a.id === sec.responsibleActivityId);
                 md += `### 區塊 ${i+1}：**${sec.name}** ${sec.fixed ? '(常設固定)' : ''}\n`;
-                md += `> 說明：${sec.desc || '無'}\n\n`;
+                md += `> **主責填寫關卡**：${respAct ? respAct.name : '跨關卡維護 / 無特定'}  \n`;
+                md += `> **說明**：${sec.desc || '無'}\n\n`;
                 md += `| 列序號 | 列名稱 (Row Name) | 欄位樣板 (Layout) | 包含元件清單 |\n`;
                 md += `| :---: | :--- | :--- | :--- |\n`;
                 const secFields = gFieldList.filter(f => f.section === sec.name);
@@ -5256,10 +5736,10 @@
             }
 
             md += `\n---\n\n`;
-            md += `## 5. 關卡欄位權限集中控管矩陣 (setFieldControl)\n\n`;
-            md += `統一在 JavaScript 的 \`setFieldControl()\` 函式集中控制各活動關卡的欄位狀態：\n\n`;
+            md += `## 5. 區塊權限矩陣與關卡欄位集中控管 (setFieldControl)\n\n`;
+            md += `以表單區塊劃分簽核關卡，統一在 JavaScript 的 \`setFieldControl()\` 函式集中控制各關卡的欄位狀態：\n\n`;
 
-            // modify by kentchuang_ai 20260917: 動態產生關卡權限矩陣 Markdown 表格
+            // modify by kentchuang_ai 20260919: 動態產生區塊權限矩陣 Markdown 表格
             let mdPermHead = `| 欄位名稱 (ID) |`;
             let mdPermSep = `| :--- |`;
             gActivityList.forEach(act => {
