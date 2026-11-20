@@ -67,6 +67,14 @@
             border-top-left-radius: 3px;
             border-top-right-radius: 3px;
         }
+        /* add by kentchuang_ai 20261120: 非阻斷式提示訊息 (Toast) 進場動畫，取代原生 alert() */
+        @keyframes efgpToastIn {
+            from { opacity: 0; transform: translateX(16px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .efgp-toast {
+            animation: efgpToastIn 0.2s ease-out;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen text-sm sm:text-base">
@@ -897,6 +905,7 @@
 
                 </div>
             </div>
+
             <div id="tabContent-matrix" class="p-6 space-y-5 hidden">
                 <div class="flex flex-wrap items-center justify-between gap-4 no-print bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <div class="flex flex-wrap items-center gap-3">
@@ -1039,9 +1048,13 @@
 
     </main>
 
+    <!-- add by kentchuang_ai 20261120: 非阻斷式提示訊息 (Toast) 容器，取代原生 alert() -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 w-[92vw] max-w-sm no-print" aria-live="polite" aria-atomic="true"></div>
+
     <!-- 彈窗 1: 新增 / 編輯區塊 Modal (字體放大、清晰易懂) -->
-    <div id="sectionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col">
+    <!-- modify by kentchuang_ai 20261120: 補上 role/aria-modal 與點擊背景遮罩關閉，改善鍵盤與無障礙操作 -->
+    <div id="sectionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print" onclick="if (event.target === this) closeSectionModal();">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="sectionModalTitle">
             <div class="bg-indigo-900 text-white px-6 py-4 flex items-center justify-between">
                 <h3 id="sectionModalTitle" class="text-base sm:text-lg font-bold flex items-center">
                     <i class="fa-solid fa-layer-group mr-2.5"></i> 新增表單區塊與多列欄位樣板 (Rows)
@@ -1095,8 +1108,9 @@
     </div>
 
     <!-- 彈窗 2: 新增 / 編輯元件規格 Modal -->
-    <div id="fieldModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col">
+    <!-- modify by kentchuang_ai 20261120: 補上 role/aria-modal 與點擊背景遮罩關閉，改善鍵盤與無障礙操作 -->
+    <div id="fieldModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print" onclick="if (event.target === this) closeFieldModal();">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
             <div class="bg-indigo-900 text-white px-6 py-4 flex items-center justify-between">
                 <h3 id="modalTitle" class="text-base sm:text-lg font-bold flex items-center">
                     <i class="fa-solid fa-pen-to-square mr-2.5"></i> 新增元件規格項目
@@ -1275,8 +1289,9 @@
     </div>
 
     <!-- 彈窗 3: 新增 / 編輯簽核流程關卡 Modal (add by kentchuang_ai 20260917) -->
-    <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col">
+    <!-- modify by kentchuang_ai 20261120: 補上 role/aria-modal 與點擊背景遮罩關閉，改善鍵盤與無障礙操作 -->
+    <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print" onclick="if (event.target === this) closeActivityModal();">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fade-in max-h-[92vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="activityModalTitle">
             <div class="bg-indigo-900 text-white px-6 py-4 flex items-center justify-between">
                 <h3 id="activityModalTitle" class="text-base sm:text-lg font-bold flex items-center">
                     <i class="fa-solid fa-diagram-project mr-2.5"></i> 新增簽核流程關卡
@@ -1788,6 +1803,70 @@
             }
         }
 
+        // add by kentchuang_ai 20261120: 非阻斷式提示訊息 (Toast)，取代原生 alert() 以避免中斷使用者操作流程
+        function showToast(pMessage, pType) {
+            const tContainer = document.getElementById('toastContainer');
+            if (!tContainer) return;
+            const tTypeMap = {
+                success: { icon: 'fa-circle-check', bg: 'bg-emerald-600', border: 'border-emerald-700' },
+                error: { icon: 'fa-circle-xmark', bg: 'bg-rose-600', border: 'border-rose-700' },
+                warning: { icon: 'fa-triangle-exclamation', bg: 'bg-amber-500', border: 'border-amber-600' },
+                info: { icon: 'fa-circle-info', bg: 'bg-indigo-600', border: 'border-indigo-700' }
+            };
+            const tStyle = tTypeMap[pType] || tTypeMap.info;
+            const tToastId = `toast_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            const tToastEl = document.createElement('div');
+            tToastEl.id = tToastId;
+            tToastEl.setAttribute('role', 'alert');
+            tToastEl.className = `efgp-toast ${tStyle.bg} text-white rounded-lg shadow-lg border ${tStyle.border} px-4 py-3 flex items-start gap-2.5`;
+            tToastEl.innerHTML = `
+                <i class="fa-solid ${tStyle.icon} mt-0.5"></i>
+                <span class="flex-1 text-sm font-bold whitespace-pre-line">${escapeHtml(pMessage)}</span>
+                <button type="button" onclick="dismissToast('${tToastId}')" class="text-white/80 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>`;
+            tContainer.appendChild(tToastEl);
+            setTimeout(() => { dismissToast(tToastId); }, pType === 'error' || pType === 'warning' ? 6000 : 3500);
+        }
+
+        function dismissToast(pToastId) {
+            const tEl = document.getElementById(pToastId);
+            if (tEl) tEl.remove();
+        }
+
+        // add by kentchuang_ai 20261120: 欄位級行內驗證錯誤顯示，取代原生 alert() 的必填/重複檢核中斷
+        function showFieldError(pInputId, pMessage) {
+            const tInput = document.getElementById(pInputId);
+            if (!tInput) return;
+            tInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-300');
+            let tErrEl = document.getElementById(`${pInputId}_error`);
+            if (!tErrEl) {
+                tErrEl = document.createElement('p');
+                tErrEl.id = `${pInputId}_error`;
+                tErrEl.className = 'text-rose-600 text-xs font-bold mt-1 flex items-center';
+                tErrEl.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i><span></span>';
+                tInput.insertAdjacentElement('afterend', tErrEl);
+            }
+            tErrEl.querySelector('span').innerText = pMessage;
+            tErrEl.classList.remove('hidden');
+            tInput.focus();
+        }
+
+        function clearFieldError(pInputId) {
+            const tInput = document.getElementById(pInputId);
+            if (tInput) tInput.classList.remove('border-rose-500', 'ring-2', 'ring-rose-300');
+            const tErrEl = document.getElementById(`${pInputId}_error`);
+            if (tErrEl) tErrEl.classList.add('hidden');
+        }
+
+        // add by kentchuang_ai 20261120: 共用欄位代號 (Field ID) 重複檢查，取代 autoApplySideProps/saveFieldItem 各自重寫一份
+        function isFieldIdDuplicate(pId, pExcludeIndex) {
+            return gFieldList.some(function(f, idx) {
+                if (idx === pExcludeIndex) return false;
+                return f.id === pId;
+            });
+        }
+
         // 載入與檢查 LocalStorage 草稿
         function checkDraftOnLoad() {
             try {
@@ -1833,9 +1912,9 @@
                 renderDesignerUI();
                 renderMatrixTable();
                 renderPermissionTable();
-                alert("已成功從本機草稿還原所有表單規格！");
+                showToast("已成功從本機草稿還原所有表單規格！", 'success');
             } catch (err) {
-                alert("還原草稿失敗，草稿資料可能已損毀。");
+                showToast("還原草稿失敗，草稿資料可能已損毀。", 'error');
             }
         }
 
@@ -1850,12 +1929,20 @@
 
         // add by kentchuang_ai 20260917: 畫布列樣板 (Row) 上下移動排序功能
         // add by kentchuang_ai 20260929: 支援區塊 (Section) 整體上下移動排序
+        // modify by kentchuang_ai 20261120: 抽出共用陣列相鄰交換邏輯，取代區塊/列上下移動 4 處重複實作
+        function swapArrayAdjacent(pArray, pIndex, pDirection) {
+            if (pIndex < 0) return false;
+            const newIndex = pIndex + pDirection;
+            if (newIndex < 0 || newIndex >= pArray.length) return false;
+            const temp = pArray[pIndex];
+            pArray[pIndex] = pArray[newIndex];
+            pArray[newIndex] = temp;
+            return true;
+        }
+
         function moveSectionUp(pSecId) {
             const idx = gSectionList.findIndex(s => s.id === pSecId);
-            if (idx > 0) {
-                const temp = gSectionList[idx];
-                gSectionList[idx] = gSectionList[idx - 1];
-                gSectionList[idx - 1] = temp;
+            if (swapArrayAdjacent(gSectionList, idx, -1)) {
                 renderDesignerUI();
                 renderMatrixTable();
                 triggerAutoSaveDraft();
@@ -1865,10 +1952,7 @@
 
         function moveSectionDown(pSecId) {
             const idx = gSectionList.findIndex(s => s.id === pSecId);
-            if (idx >= 0 && idx < gSectionList.length - 1) {
-                const temp = gSectionList[idx];
-                gSectionList[idx] = gSectionList[idx + 1];
-                gSectionList[idx + 1] = temp;
+            if (swapArrayAdjacent(gSectionList, idx, 1)) {
                 renderDesignerUI();
                 renderMatrixTable();
                 triggerAutoSaveDraft();
@@ -1880,10 +1964,7 @@
             const sec = gSectionList.find(s => s.id === pSecId);
             if (!sec || !sec.rows) return;
             const idx = sec.rows.findIndex(r => r.id === pRowId);
-            if (idx > 0) {
-                const temp = sec.rows[idx];
-                sec.rows[idx] = sec.rows[idx - 1];
-                sec.rows[idx - 1] = temp;
+            if (swapArrayAdjacent(sec.rows, idx, -1)) {
                 renderDesignerUI();
                 renderMatrixTable();
                 triggerAutoSaveDraft();
@@ -1895,10 +1976,7 @@
             const sec = gSectionList.find(s => s.id === pSecId);
             if (!sec || !sec.rows) return;
             const idx = sec.rows.findIndex(r => r.id === pRowId);
-            if (idx >= 0 && idx < sec.rows.length - 1) {
-                const temp = sec.rows[idx];
-                sec.rows[idx] = sec.rows[idx + 1];
-                sec.rows[idx + 1] = temp;
+            if (swapArrayAdjacent(sec.rows, idx, 1)) {
                 renderDesignerUI();
                 renderMatrixTable();
                 triggerAutoSaveDraft();
@@ -1911,10 +1989,10 @@
         function validateRequiredFormInfo() {
             const name = document.getElementById('formName').value.trim();
             if (!name) {
-                alert("請填寫「表單中文名稱 *」！");
-                document.getElementById('formName').focus();
+                showFieldError('formName', "請填寫「表單中文名稱」！");
                 return false;
             }
+            clearFieldError('formName');
             return true;
         }
 
@@ -2008,6 +2086,7 @@
                 initEmptyForm();
             }
         }
+
         // 頁籤切換
         
         // ==========================================
@@ -2081,9 +2160,16 @@
 
         // add by kentchuang_ai 20260917: 監聽 ESC 鍵退出放大預覽模式
         // modify by kentchuang_ai 20260929: 無放大預覽時，ESC 改為取消目前選取的元件/格子
+        // modify by kentchuang_ai 20261120: ESC 優先關閉目前開啟中的彈窗 (Modal)，改善鍵盤操作一致性
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (gIsFocusPreviewMode) {
+                if (!document.getElementById('sectionModal').classList.contains('hidden')) {
+                    closeSectionModal();
+                } else if (!document.getElementById('fieldModal').classList.contains('hidden')) {
+                    closeFieldModal();
+                } else if (!document.getElementById('activityModal').classList.contains('hidden')) {
+                    closeActivityModal();
+                } else if (gIsFocusPreviewMode) {
                     toggleFocusPreviewMode(false);
                 } else if (gActiveFieldId || gActiveCellTarget) {
                     clearCanvasSelection();
@@ -2180,7 +2266,7 @@
         function quickAddRowTemplate(layout) {
             triggerAutoSaveDraft();
             if (!gSectionList || gSectionList.length === 0) {
-                alert("請先點擊上方「新增所屬區塊」建立至少一個表單區塊！");
+                showToast("請先點擊上方「新增所屬區塊」建立至少一個表單區塊！", 'warning');
                 return;
             }
             let targetSec = gSectionList.find(s => s.id === gActiveSectionId);
@@ -2203,16 +2289,27 @@
         }
 
         // add by kentchuang_ai 20260929: 依目前欄位清單，同步左側元件庫 Attachment 按鈕的可點擊狀態 (EFGP 系統限制一張表單僅能 1 個)
+        // modify by kentchuang_ai 20261120: 抽出共用判斷式 (支援排除自身編輯中項目)，取代 Attachment/SerialNumber 限制散落多處重複實作
+        function formHasAttachment(pExcludeIndex) {
+            return gFieldList.some(function(f, idx) {
+                if (idx === pExcludeIndex) return false;
+                return f.type === 'Attachment';
+            });
+        }
+
         function updateAttachmentPaletteState() {
             const btn = document.getElementById('paletteBtnAttachment');
             if (!btn) return;
-            const hasAttachment = gFieldList.some(f => f.type === 'Attachment');
-            btn.disabled = hasAttachment;
+            btn.disabled = formHasAttachment();
         }
 
         // add by kentchuang_ai 20260929: EFGP 系統限制一張表單僅能有 1 個 SerialNumber (單號) 元件；預設樣板已內建常設的「單號」欄位 (id: SerialNumber)，故一併納入判斷
-        function formHasSerialNumber() {
-            return gFieldList.some(f => f.type === 'SerialNumber' || (f.id && f.id.toLowerCase() === 'serialnumber'));
+        // modify by kentchuang_ai 20261120: 增加 pExcludeIndex 參數，供編輯中欄位排除自身使用
+        function formHasSerialNumber(pExcludeIndex) {
+            return gFieldList.some(function(f, idx) {
+                if (idx === pExcludeIndex) return false;
+                return f.type === 'SerialNumber' || (f.id && f.id.toLowerCase() === 'serialnumber');
+            });
         }
 
         // 同步左側元件庫 SerialNumber 按鈕的可點擊狀態
@@ -2225,18 +2322,18 @@
         // modify by kentchuang_ai 20260916: 點選左側元件快速放入選中之格子 (支援複合開窗元件 DialogInput/DialogInputLabel/DialogInputMulti/DoubleTextBox)
         function quickPlaceComponent(type) {
             // add by kentchuang_ai 20260929: EFGP 系統限制一張表單僅能有 1 個 Attachment 元件，避免使用者不知情重複新增
-            if (type === 'Attachment' && gFieldList.some(f => f.type === 'Attachment')) {
-                alert("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 Attachment (附件上傳) 元件，此表單已放置過附件元件，請勿重複新增！");
+            if (type === 'Attachment' && formHasAttachment()) {
+                showToast("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 Attachment (附件上傳) 元件，此表單已放置過附件元件，請勿重複新增！", 'warning');
                 return;
             }
             // add by kentchuang_ai 20260929: EFGP 系統限制一張表單僅能有 1 個 SerialNumber (單號) 元件，避免使用者不知情重複新增
             if (type === 'SerialNumber' && formHasSerialNumber()) {
-                alert("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 SerialNumber (單號) 元件，此表單已存在單號元件，請勿重複新增！");
+                showToast("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 SerialNumber (單號) 元件，此表單已存在單號元件，請勿重複新增！", 'warning');
                 return;
             }
             triggerAutoSaveDraft();
             if (!gSectionList || gSectionList.length === 0) {
-                alert("請先建立區塊並新增列樣板！");
+                showToast("請先建立區塊並新增列樣板！", 'warning');
                 return;
             }
 
@@ -2714,15 +2811,15 @@
 
             // 若有變更 ID
             // modify by kentchuang_ai 20260917: 增加欄位 ID 重複檢核防呆
+            // modify by kentchuang_ai 20261120: 改用共用判斷式 isFieldIdDuplicate，排除自身編輯中項目
             if (newId !== origId) {
-                const tIsDuplicate = gFieldList.some(function(f) {
-                    return f.id === newId;
-                });
+                const tIsDuplicate = isFieldIdDuplicate(newId, gFieldList.indexOf(field));
                 if (tIsDuplicate) {
-                    alert("欄位代號【" + newId + "】已存在，請使用其他不重複的代號！");
+                    showFieldError('propIdInput', "欄位代號【" + newId + "】已存在，請使用其他不重複的代號！");
                     document.getElementById('propIdInput').value = origId;
                     return;
                 }
+                clearFieldError('propIdInput');
                 field.id = newId;
                 document.getElementById('propFieldId').value = newId;
                 gActiveFieldId = newId;
@@ -2794,6 +2891,7 @@
                 }
             }
         }
+
         // 刪除目前選中的元件
         function deleteActiveField() {
             triggerAutoSaveDraft();
@@ -2884,6 +2982,7 @@
                 gHasExported = false;
             }
         }
+
         // 核心：繪製仿原生 EFGP 表單設計師畫布
         // modify by kentchuang_ai 20260917: 健全化 gActiveSectionId 容錯與自動更新區塊下拉選單
         function renderDesignerUI() {
@@ -3460,7 +3559,7 @@
         function removeSectionRowItem(btn) {
             const container = document.getElementById('sectionRowsContainer');
             if (container.children.length <= 1) {
-                alert("區塊必須至少保留 1 個列樣板！");
+                showToast("區塊必須至少保留 1 個列樣板！", 'warning');
                 return;
             }
             btn.closest('.section-row-item').remove();
@@ -3481,6 +3580,7 @@
 
         // 開啟新增區塊 Modal
         function openAddSectionModal() {
+            clearFieldError('sectionNameInput');
             document.getElementById('sectionEditIndex').value = "-1";
             document.getElementById('sectionModalTitle').innerHTML = '<i class="fa-solid fa-layer-group mr-2.5"></i> 新增表單區塊與多列欄位樣板 (Rows)';
             document.getElementById('sectionForm').reset();
@@ -3491,6 +3591,7 @@
 
         // 編輯區塊
         function editSectionItem(idx) {
+            clearFieldError('sectionNameInput');
             const sec = gSectionList[idx];
             document.getElementById('sectionEditIndex').value = idx;
             document.getElementById('sectionModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2.5"></i> 編輯區塊名稱與多列樣板配置';
@@ -3536,7 +3637,7 @@
                 }
             } else {
                 if (gSectionList.some(s => s.name === name)) {
-                    alert("已存在相同名稱的區塊，請更換區塊名稱！");
+                    showFieldError('sectionNameInput', "已存在相同名稱的區塊，請更換區塊名稱！");
                     return;
                 }
                 gSectionList.push({
@@ -3554,6 +3655,7 @@
             renderMatrixTable();
             gHasExported = false;
         }
+
         // 刪除區塊
         function deleteSectionItem(idx) {
             const sec = gSectionList[idx];
@@ -3604,7 +3706,7 @@
             }
             tNewName = tNewName.trim();
             if (tNewName === "") {
-                alert("區塊名稱不得為空！");
+                showToast("區塊名稱不得為空！", 'warning');
                 return;
             }
             if (tNewName === tOldName) {
@@ -3613,7 +3715,7 @@
             // 檢查是否有同名區塊
             let tIsDuplicate = gSectionList.some(s => s.id !== pSecId && s.name === tNewName);
             if (tIsDuplicate) {
-                alert("已存在相同名稱的區塊，請更換名稱！");
+                showToast("已存在相同名稱的區塊，請更換名稱！", 'warning');
                 return;
             }
 
@@ -3758,7 +3860,7 @@
         function removeSubTabInnerRow(btn) {
             const list = btn.closest('.subtab-inner-rows-list');
             if (list.children.length <= 1) {
-                alert("此分頁必須至少保留 1 個列樣板！");
+                showToast("此分頁必須至少保留 1 個列樣板！", 'warning');
                 return;
             }
             btn.closest('.subtab-inner-row-item').remove();
@@ -3884,7 +3986,7 @@
         function removeGridColumnRow(btn) {
             const container = document.getElementById('gridColumnsContainer');
             if (container.children.length <= 1) {
-                alert("Grid 表格至少必須保留 1 個欄位！");
+                showToast("Grid 表格至少必須保留 1 個欄位！", 'warning');
                 return;
             }
             btn.closest('.grid-col-row').remove();
@@ -4000,10 +4102,11 @@
         // modify by kentchuang_ai 20260917: 修正無區塊時之引導呼叫 openAddSectionModal
         function openAddFieldModal() {
             if (gSectionList.length === 0) {
-                alert("請先建立至少一個區塊！即將為您開啟新增區塊視窗。");
+                showToast("請先建立至少一個區塊！即將為您開啟新增區塊視窗。", 'warning');
                 openAddSectionModal();
                 return;
             }
+            clearFieldError('modalId');
             document.getElementById('editIndex').value = "-1";
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus mr-2.5"></i> 新增元件規格項目';
             document.getElementById('fieldForm').reset();
@@ -4019,6 +4122,7 @@
 
         // 編輯欄位
         function editFieldItem(index) {
+            clearFieldError('modalId');
             const item = gFieldList[index];
             document.getElementById('editIndex').value = index;
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2.5"></i> 編輯元件規格項目';
@@ -4085,13 +4189,15 @@
             const parentVal = document.getElementById('modalParentTab').value;
 
             // add by kentchuang_ai 20260929: EFGP 系統限制一張表單僅能有 1 個 Attachment 元件，避免使用者不知情重複新增
-            if (type === 'Attachment' && gFieldList.some((f, idx) => idx !== editIndex && f.type === 'Attachment')) {
-                alert("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 Attachment (附件上傳) 元件，此表單已存在附件元件，請勿重複新增！");
+            // modify by kentchuang_ai 20261120: 改用共用判斷式 formHasAttachment，排除自身編輯中項目
+            if (type === 'Attachment' && formHasAttachment(editIndex)) {
+                showToast("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 Attachment (附件上傳) 元件，此表單已存在附件元件，請勿重複新增！", 'warning');
                 return;
             }
             // add by kentchuang_ai 20260929: EFGP 系統限制一張表單僅能有 1 個 SerialNumber (單號) 元件，避免使用者不知情重複新增
-            if (type === 'SerialNumber' && gFieldList.some((f, idx) => idx !== editIndex && (f.type === 'SerialNumber' || (f.id && f.id.toLowerCase() === 'serialnumber')))) {
-                alert("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 SerialNumber (單號) 元件，此表單已存在單號元件，請勿重複新增！");
+            // modify by kentchuang_ai 20261120: 改用共用判斷式 formHasSerialNumber，排除自身編輯中項目
+            if (type === 'SerialNumber' && formHasSerialNumber(editIndex)) {
+                showToast("⚠️ EFGP 系統限制：一張表單僅能設定 1 個 SerialNumber (單號) 元件，此表單已存在單號元件，請勿重複新增！", 'warning');
                 return;
             }
 
@@ -4109,7 +4215,7 @@
             if (type === 'SubTab') {
                 subTabs = collectSubTabItems();
                 if (subTabs.length === 0) {
-                    alert("SubTab 頁籤容器必須至少設定 1 個分頁項目！");
+                    showToast("SubTab 頁籤容器必須至少設定 1 個分頁項目！", 'warning');
                     return;
                 }
             }
@@ -4119,7 +4225,7 @@
             if (type === 'Grid') {
                 gridColumns = collectGridColumns();
                 if (gridColumns.length === 0) {
-                    alert("Grid 單身表格必須至少設定 1 個表格欄位 (Column)！");
+                    showToast("Grid 單身表格必須至少設定 1 個表格欄位 (Column)！", 'warning');
                     return;
                 }
                 // modify by kentchuang_ai 20260917: gridActions 由最外層屬性面板統一管理，此處保留現有設定或預設全選
@@ -4130,16 +4236,13 @@
             const autoId = rawId || ("field_" + Date.now().toString().slice(-6));
 
             // modify by kentchuang_ai 20260917: 增加欄位 ID 重複防呆檢核 (排除自身編輯項目)
-            const tIsDuplicate = gFieldList.some(function(f, idx) {
-                if (idx === editIndex) {
-                    return false;
-                }
-                return f.id === autoId;
-            });
+            // modify by kentchuang_ai 20261120: 改用共用判斷式 isFieldIdDuplicate，取代重寫一份的重複邏輯
+            const tIsDuplicate = isFieldIdDuplicate(autoId, editIndex);
             if (tIsDuplicate) {
-                alert("欄位代號【" + autoId + "】已存在，請使用其他不重複的代號！");
+                showFieldError('modalId', "欄位代號【" + autoId + "】已存在，請使用其他不重複的代號！");
                 return;
             }
+            clearFieldError('modalId');
 
             const newItem = {
                 section: document.getElementById('modalSection').value,
@@ -4531,6 +4634,14 @@
             gHasExported = false;
         }
 
+        // add by kentchuang_ai 20261120: 共用「SerialNumber 欄位禁止停用、強制鎖定唯讀」規則，取代批次權限 3 處重複實作
+        function resolveFieldPermValue(pFieldId, pPermValue) {
+            if (pFieldId === 'SerialNumber' && pPermValue === '停用') {
+                return '唯讀';
+            }
+            return pPermValue;
+        }
+
         // add by kentchuang_ai 20260917: 批次設定特定關卡所有欄位之權限
         function batchSetActivityPerm(actId, permValue) {
             triggerAutoSaveDraft();
@@ -4540,11 +4651,7 @@
 
             gFieldList.forEach(item => {
                 if (!item.permissions) item.permissions = {};
-                if (item.id === 'SerialNumber' && permValue === '停用') {
-                    item.permissions[actId] = '唯讀';
-                } else {
-                    item.permissions[actId] = permValue;
-                }
+                item.permissions[actId] = resolveFieldPermValue(item.id, permValue);
             });
             renderPermissionTable();
             gHasExported = false;
@@ -4557,11 +4664,7 @@
             if (!item) return;
             if (!item.permissions) item.permissions = {};
             gActivityList.forEach(act => {
-                if (item.id === 'SerialNumber' && permValue === '停用') {
-                    item.permissions[act.id] = '唯讀';
-                } else {
-                    item.permissions[act.id] = permValue;
-                }
+                item.permissions[act.id] = resolveFieldPermValue(item.id, permValue);
             });
             renderPermissionTable();
             gHasExported = false;
@@ -4574,11 +4677,7 @@
             gFieldList.forEach(item => {
                 if (!item.permissions) item.permissions = {};
                 gActivityList.forEach(act => {
-                    if (item.id === 'SerialNumber' && permValue === '停用') {
-                        item.permissions[act.id] = '唯讀';
-                    } else {
-                        item.permissions[act.id] = permValue;
-                    }
+                    item.permissions[act.id] = resolveFieldPermValue(item.id, permValue);
                 });
             });
             renderPermissionTable();
@@ -4587,6 +4686,7 @@
 
         // add by kentchuang_ai 20260917: 打開新增關卡 Modal
         function openAddActivityModal() {
+            clearFieldError('activityNameInput');
             document.getElementById('activityModalTitle').innerHTML = '<i class="fa-solid fa-plus mr-2.5"></i> 新增簽核流程關卡';
             document.getElementById('activityEditId').value = '';
             document.getElementById('activityNameInput').value = `關卡${gActivityList.length + 1}: `;
@@ -4598,6 +4698,7 @@
 
         // add by kentchuang_ai 20260917: 打開編輯關卡 Modal
         function openEditActivityModal(actId) {
+            clearFieldError('activityNameInput');
             const act = gActivityList.find(a => a.id === actId);
             if (!act) return;
             document.getElementById('activityModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2.5"></i> 編輯關卡名稱';
@@ -4622,7 +4723,7 @@
             const defaultPerm = document.getElementById('activityDefaultPermSelect').value;
 
             if (!name) {
-                alert("請輸入關卡名稱！");
+                showFieldError('activityNameInput', "請輸入關卡名稱！");
                 return;
             }
 
@@ -4652,7 +4753,7 @@
         function deleteActivity(actId) {
             triggerAutoSaveDraft();
             if (gActivityList.length <= 1) {
-                alert("至少需保留一個簽核關卡！");
+                showToast("至少需保留一個簽核關卡！", 'warning');
                 return;
             }
             const act = gActivityList.find(a => a.id === actId);
@@ -4678,6 +4779,7 @@
                 gHasExported = false;
             }
         }
+
         // 匯出 JSON (modify by kentchuang_ai 20260917: 支援 activities 關卡清單匯出與必填防呆)
         function exportJSON() {
             if (!validateRequiredFormInfo()) return;
@@ -4852,10 +4954,10 @@
                         repairNote += repairResult.addedRowCount > 0 ? `（含新增 ${repairResult.addedRowCount} 個延伸列安置超出該列容量之元件）` : "";
                         repairNote += "，請重新確認排版是否正確。";
                     }
-                    alert("【JSON 規格檔匯入成功】\n已成功載入 " + gSectionList.length + " 個區塊、" + gFieldList.length + " 個元件與 " + gActivityList.length + " 道簽核關卡！" + repairNote);
+                    showToast("【JSON 規格檔匯入成功】\n已成功載入 " + gSectionList.length + " 個區塊、" + gFieldList.length + " 個元件與 " + gActivityList.length + " 道簽核關卡！" + repairNote, 'success');
                 } catch (err) {
                     console.error("JSON 解析失敗：", err);
-                    alert("【JSON 解析失敗】\n原因：" + (err.message || "檔案內容格式不符合預期規格，請確認 JSON 格式！"));
+                    showToast("【JSON 解析失敗】\n原因：" + (err.message || "檔案內容格式不符合預期規格，請確認 JSON 格式！"), 'error');
                 }
             };
             reader.readAsText(file);
@@ -4913,10 +5015,10 @@
                         repairNote += repairResult.addedRowCount > 0 ? `（含新增 ${repairResult.addedRowCount} 個延伸列安置超出該列容量之元件）` : "";
                         repairNote += "，請重新確認排版是否正確。";
                     }
-                    alert(`【.form 原始檔逆向工程成功】\n已成功解析表單「${parsedData.formMeta.formName}」！\n共載入 ${gSectionList.length} 個區塊、${gFieldList.length} 個表單元件。${activitiesNote}${repairNote}`);
+                    showToast(`【.form 原始檔逆向工程成功】\n已成功解析表單「${parsedData.formMeta.formName}」！\n共載入 ${gSectionList.length} 個區塊、${gFieldList.length} 個表單元件。${activitiesNote}${repairNote}`, 'success');
                 } catch (err) {
                     console.error("解析 .form 發生錯誤：", err);
-                    alert("【.form 解析失敗】\n原因：" + (err.message || "檔案格式不合法或無法解析 XML 結構！"));
+                    showToast("【.form 解析失敗】\n原因：" + (err.message || "檔案格式不合法或無法解析 XML 結構！"), 'error');
                 }
             };
             reader.readAsText(file, "UTF-8");
@@ -5616,7 +5718,7 @@
             gHasExported = true; // 標記已成功匯出設定值
             } catch (err) {
                 console.error("匯出 Markdown 失敗：", err);
-                alert("【匯出 Markdown 失敗】\n原因：" + (err.message || "產生規格書時發生未預期錯誤！"));
+                showToast("【匯出 Markdown 失敗】\n原因：" + (err.message || "產生規格書時發生未預期錯誤！"), 'error');
             }
         }
     </script>

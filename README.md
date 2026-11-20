@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Zero-Dependency](https://img.shields.io/badge/Dependencies-Zero-green.svg)](#-技術架構與資安規範-architecture--security)
 [![Pure Frontend](https://img.shields.io/badge/Platform-Pure%20HTML5%20%2F%20JS-orange.svg)](#-技術架構與資安規範-architecture--security)
-[![Security Review](https://img.shields.io/badge/Security-Passed%20(Claude%20Code%20Review)-brightgreen.svg)](Form_Specification_Interactive_Tool_Review.md)
+![Security Review](https://img.shields.io/badge/Security-Passed%20(Claude%20Code%20Review)-brightgreen.svg)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success.svg)](https://kentchuang.github.io/efgp-form-spec-tool/)
 
 👉 **[點此立刻線上體驗 (Live Demo)](https://kentchuang.github.io/efgp-form-spec-tool/)**
@@ -30,13 +30,12 @@
 ## 🌟 核心功能特色 (Key Features)
 
 ### 1. 🚀 零環境相依・企業級資安與完整性 (Zero Dependency & Enterprise Security)
-- **單一 HTML 檔案**：純前端單檔架構（5,600+ 行純 HTML5/Vanilla JS），不需安裝 Node.js、Python 或架設任何後端資料庫。
+- **單一 HTML 檔案**：純前端單檔架構（5,700+ 行純 HTML5/Vanilla JS），不需安裝 Node.js、Python 或架設任何後端資料庫。
 - **雙擊即可開始**：只要有現代瀏覽器（Chrome, Edge, Firefox, Safari），下載後直接開啟即可設計。
 - **100% 離線純前端運作**：所有規格資料僅儲存於瀏覽器本機 `localStorage`，無任何後端伺服器連線或資料外洩風險。
 - **通過 Claude Code Security Review 資安審查**：
   - 全面防堵 DOM-based 跨站腳本攻擊 ([CWE-79](https://cwe.mitre.org/data/definitions/79.html))，所有畫布列標題、下拉選單、SubTab、Grid 欄位與屬性面板均導入嚴格 `escapeHtml()` 跳脫機制。
-  - **程式完整性保證**：HTML 105 個 DOM ID 與 JS 腳本 88 處元素參照 100% 吻合，102 個核心函式與 128 處行內事件精確綁定，無任何懸空指標或未定義元素。
-  - 詳細審查報告請參閱 [Form_Specification_Interactive_Tool_Review.md](Form_Specification_Interactive_Tool_Review.md)。
+  - **程式完整性保證**：HTML 106 個 DOM ID 與 JS 腳本 87 處元素參照 100% 吻合，112 個核心函式與 133 處行內事件精確綁定，無任何懸空指標或未定義元素。
 
 ### 2. 🎨 專注現代 RWD 響應式排版與流暢互動 (Visual RWD Designer & Fluid UX)
 - **Bootstrap 12 格線體系**：支援單欄 (100%)、等寬雙欄 (50:50)、比例雙欄 (40:60 / 60:40 / 30:70 / 70:30)、三欄與四欄等多元響應式佈局。
@@ -50,6 +49,7 @@
   - **直覺顯示資料來源 (Source)**：畫布元件方框直接顯示資料來源標籤（ERP 開窗、SQL 查詢、SAP RFC 或系統變數），方便業務即時核對。
   - **Attachment / SerialNumber 單表限量防呆**：附件與流水號元件具備單張表單限量新增檢查與按鈕狀態自動同步。
   - **代號彈性選填**：表單代號與欄位代號支援選填並自動產生，降低訪談初期的填寫負擔。
+  - **非阻斷式提示與行內驗證 (Toast & Inline Validation)**：以浮動 Toast 提示取代原生 `alert()`，區塊名稱／欄位代號／關卡名稱重複等防呆訊息不再中斷編輯節奏；三大設定視窗（區塊／元件／簽核關卡）支援 `ESC` 鍵與點擊背景遮罩關閉，並補強 `role="dialog"` 等鍵盤與螢幕報讀器無障礙屬性。
 
 ### 3. 🛡️ 獨家「智慧槽位防碰撞與自動修復引擎」(Collision Protection & Auto-Healing)
 針對大型複雜表單最易發生的「元件神秘消失」痛點，內建全方位防碰撞與資料修復機制：
@@ -108,10 +108,10 @@ flowchart LR
 
 ## 🛠️ 技術架構與資安規範 (Architecture & Security)
 
-- **核心技術**：純 HTML5 + Vanilla JavaScript (ES6+)，單一獨立 HTML 檔案（5,600+ 行代碼）。
+- **核心技術**：純 HTML5 + Vanilla JavaScript (ES6+)，單一獨立 HTML 檔案（5,700+ 行代碼）。
 - **樣式與圖示**：[Tailwind CSS (CDN)](https://tailwindcss.com/) + [FontAwesome 6 (CDN)](https://fontawesome.com/)。
 - **資料儲存**：瀏覽器客戶端記憶體 + `window.localStorage`（100% 離線純前端，零後端相依）。
-- **資安防護**：通過 [Claude Code Security Review](Form_Specification_Interactive_Tool_Review.md) 資安審核，全輸出 `escapeHtml()` 處理，徹底杜絕 DOM-based XSS (CWE-79)。
+- **資安防護**：通過 Claude Code Security Review 資安審核，全輸出 `escapeHtml()` 處理，徹底杜絕 DOM-based XSS (CWE-79)。
 - **瀏覽器相容性**：支援現代主流瀏覽器（Google Chrome、Microsoft Edge、Mozilla Firefox、Apple Safari）。
 
 ---
@@ -133,7 +133,6 @@ flowchart LR
 
 ## 🔗 相關文件 (Related Documentation)
 
-- [🛡️ 工具程式完整性與資安修復報告 (Form_Specification_Interactive_Tool_Review.md)](Form_Specification_Interactive_Tool_Review.md)
 - [💻 EFGP 專案客製開發規範與原則 (.agents/AGENTS.md)](../.agents/AGENTS.md)
 - [📐 EFGP RWD 表單 JS 設計規範指南 (.agents/skills/efgp_rwd_form_js/SKILL.md)](../.agents/skills/efgp_rwd_form_js/SKILL.md)
 
