@@ -189,14 +189,13 @@
                     <input type="text" id="formName" oninput="triggerAutoSaveDraft()" placeholder="例如：會議決策與轉倉申請單" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label for="formId" class="block text-sm font-bold text-slate-700 mb-1.5 cursor-pointer">表單代號 (Form ID) <span class="font-normal text-slate-400 text-xs">(選填，屬系統代號，規劃初期可留空，由 SA 後續命名)</span></label>
-                    <input type="text" id="formId" oninput="triggerAutoSaveDraft()" placeholder="例如：MaGpTrans / ReviewDecision (可留待 SA 補填)" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono font-bold text-indigo-700">
+                    <label for="formId" class="block text-sm font-bold text-slate-700 mb-1.5 cursor-pointer">表單代號 (Form ID) <span class="font-normal text-slate-400 text-xs">(選填，由 SA 後續命名)</span></label>
+                    <input type="text" id="formId" oninput="triggerAutoSaveDraft()" placeholder="例如：MaGpTrans (可留待 SA 補填)" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono font-bold text-indigo-700">
                 </div>
                 <div>
                     <label for="formType" class="block text-sm font-bold text-slate-700 mb-1.5 cursor-pointer">排版框架 (Layout Engine)</label>
                     <select id="formType" onchange="triggerAutoSaveDraft()" class="w-full text-sm sm:text-base px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium bg-white">
                         <option value="RWD" selected>RWD 響應式佈局 (推薦，支援 PC/行動版)</option>
-                        <option value="Absolute">傳統絕對定位佈局 (舊版像素座標)</option>
                     </select>
                 </div>
                 <div>
